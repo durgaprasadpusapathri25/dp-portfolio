@@ -1,0 +1,1100 @@
+
+/* DP PORTFOLIO — Luxury Homepage */
+
+#root {
+  min-height: 100vh;
+}
+
+.portfolio {
+  min-height: 100vh;
+  background: #090909;
+  color: #f7f4ed;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 7%;
+  border-bottom: 1px solid #ffffff14;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: -2px;
+  transition:
+    text-shadow 0.35s ease,
+    transform 0.35s ease;
+}
+
+/* Luxury DP Logo */
+
+.brand-logo {
+  display: block;
+  width: auto;
+  height: 100px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(
+    0 0 10px rgba(214, 173, 96, 0.12)
+  );
+  transition:
+    filter 0.4s ease,
+    transform 0.4s ease;
+}
+
+.brand:hover {
+  text-shadow: 0 0 24px rgba(214, 173, 96, 0.45);
+  transform: translateY(-2px);
+}
+
+.brand:hover .brand-logo {
+  filter: drop-shadow(
+    0 0 18px rgba(214, 173, 96, 0.4)
+  );
+  transform: scale(1.04);
+}
+
+.brand span,
+.hero-section h1 span,
+.preview-section h2 span,
+.contact-section h2 span {
+  color: #d6ad60;
+}
+
+.nav-link {
+  position: relative;
+  color: #e8d3a6;
+  font-size: 14px;
+  text-decoration: none;
+  padding-bottom: 6px;
+  white-space: nowrap;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: #d6ad60;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s ease;
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Hero Section */
+
+.hero-section {
+  min-height: 80vh;
+  padding: 120px 7% 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background:
+    radial-gradient(
+      ellipse at 75% 30%,
+      #a87c2718,
+      transparent 50%
+    ),
+    #090909;
+}
+
+.eyebrow {
+  color: #d6ad60;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.hero-section h1 {
+  max-width: 1050px;
+  margin: 28px 0;
+  font-size: clamp(42px, 6vw, 90px);
+  line-height: 1.12;
+  letter-spacing: -3px;
+  font-weight: 700;
+}
+
+.hero-section h1 span {
+  background: linear-gradient(
+    110deg,
+    #b98a3d 0%,
+    #f6d996 45%,
+    #d6ad60 75%,
+    #b98a3d 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-description {
+  max-width: 580px;
+  color: #aaa9a6;
+  font-size: 17px;
+  line-height: 1.9;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 38px;
+}
+
+/* Premium Buttons */
+
+.primary-button,
+.secondary-button {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  padding: 17px 29px;
+  border-radius: 3px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.primary-button {
+  background: #d6ad60;
+  color: #111;
+}
+
+.secondary-button {
+  color: #f7f4ed;
+  border: 1px solid #75623d;
+}
+
+.primary-button:hover {
+  background: #f1cf8c;
+  box-shadow:
+    0 10px 35px rgba(214, 173, 96, 0.2),
+    0 0 25px rgba(214, 173, 96, 0.15);
+  transform: translateY(-4px);
+}
+
+.secondary-button:hover {
+  border-color: #d6ad60;
+  background: rgba(214, 173, 96, 0.08);
+  box-shadow:
+    0 8px 30px rgba(214, 173, 96, 0.08);
+  transform: translateY(-4px);
+}
+
+.hero-signature {
+  margin-top: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.hero-signature span {
+  color: #888;
+  font-weight: 400;
+}
+
+/* Works & Contact Sections */
+
+.preview-section,
+.contact-section {
+  padding: 110px 7%;
+  border-top: 1px solid #ffffff16;
+}
+
+.preview-section {
+  background: #11100e;
+}
+
+.preview-section h2,
+.contact-section h2 {
+  font-size: clamp(36px, 5vw, 66px);
+  letter-spacing: -2px;
+  margin: 20px 0;
+}
+
+.preview-section > div > p:last-child,
+.contact-section > div > p:last-child {
+  color: #aaa9a6;
+  line-height: 1.8;
+}
+
+/* Footer */
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 30px 7%;
+  border-top: 1px solid #ffffff16;
+  color: #888;
+  font-size: 12px;
+}
+
+/* Mobile Responsive */
+
+@media (max-width: 600px) {
+  .navbar {
+    padding: 12px 6%;
+    gap: 12px;
+  }
+
+  .brand-logo {
+    height: 70px;
+  }
+
+  .nav-link {
+    font-size: 12px;
+  }
+
+  .hero-section {
+    min-height: 75vh;
+    padding: 90px 6% 65px;
+  }
+
+  .hero-section h1 {
+    font-size: clamp(38px, 10vw, 56px);
+    letter-spacing: -1.5px;
+  }
+
+  .hero-description {
+    font-size: 15px;
+  }
+
+  .hero-signature {
+    margin-top: 75px;
+    line-height: 1.8;
+  }
+
+  .preview-section,
+  .contact-section {
+    padding: 75px 6%;
+  }
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  .brand,
+  .brand-logo,
+  .nav-link::after,
+  .primary-button,
+  .secondary-button {
+    transition: none;
+  }
+
+  .brand:hover,
+  .brand:hover .brand-logo,
+  .primary-button:hover,
+  .secondary-button:hover {
+    transform: none;
+  }
+}
+
+
+/* STEP 50 — Mobile Layout Polish */
+
+@media (max-width: 600px) {
+  .hero-section h1 {
+    font-size: clamp(34px, 9vw, 46px);
+    line-height: 1.16;
+    letter-spacing: -1.4px;
+    overflow-wrap: break-word;
+  }
+
+  .hero-actions {
+    width: 100%;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+    max-width: 240px;
+    text-align: center;
+  }
+
+  .hero-signature {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+  }
+}
+
+
+/* STEP 51 — Cinematic Gold Ambient Background */
+
+.hero-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: min(75vw, 900px);
+  height: min(75vw, 900px);
+  top: -25%;
+  right: -20%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(214, 173, 96, 0.13) 0%,
+    rgba(184, 129, 42, 0.06) 35%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: dpGoldFloat 14s ease-in-out infinite alternate;
+}
+
+@keyframes dpGoldFloat {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: translate3d(-8%, 7%, 0) scale(1.12);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translate3d(-15%, -5%, 0) scale(1.05);
+    opacity: 0.65;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-section::before {
+    width: 110vw;
+    height: 110vw;
+    top: 5%;
+    right: -45%;
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-section::before {
+    animation: none;
+  }
+}
+
+
+/* STEP 52 — Luxury Scroll Indicator */
+
+.scroll-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 55px;
+  color: #a99b83;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  transition: color 0.3s ease;
+}
+
+.scroll-indicator:hover {
+  color: #f1cf8c;
+}
+
+.scroll-arrow {
+  display: inline-block;
+  color: #d6ad60;
+  font-size: 23px;
+  line-height: 1;
+  animation: dpScrollBounce 2s ease-in-out infinite;
+}
+
+@keyframes dpScrollBounce {
+  0%, 100% {
+    transform: translateY(-4px);
+  }
+
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-indicator {
+    transition: none;
+  }
+
+  .scroll-arrow {
+    animation: none;
+  }
+}
+
+
+/* STEP 54 — Luxury Selected Works Showcase */
+
+.preview-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-section::before {
+  content: '';
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  top: -180px;
+  right: -150px;
+  background: radial-gradient(
+    circle,
+    rgba(214, 173, 96, 0.07),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.work-intro {
+  max-width: 680px;
+  margin-bottom: 50px;
+}
+
+.work-intro h2 {
+  line-height: 1.15;
+}
+
+.work-description {
+  max-width: 520px;
+  color: #aaa9a6;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.work-showcase {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 380px;
+  padding: 45px;
+  border: 1px solid rgba(214, 173, 96, 0.2);
+  border-radius: 12px;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(214, 173, 96, 0.09),
+      transparent 65%
+    ),
+    linear-gradient(145deg, #191713, #0c0b0a);
+  overflow: hidden;
+  text-align: center;
+  transition:
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.work-showcase:hover {
+  border-color: rgba(214, 173, 96, 0.5);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.25);
+}
+
+.work-showcase-content {
+  position: relative;
+  z-index: 1;
+  max-width: 460px;
+}
+
+.work-showcase-icon {
+  display: block;
+  margin-bottom: 24px;
+  color: #d6ad60;
+  font-size: 36px;
+}
+
+.work-showcase h3 {
+  margin-bottom: 16px;
+  color: #f7f4ed;
+  font-size: clamp(26px, 4vw, 40px);
+  letter-spacing: -1px;
+}
+
+.work-showcase p {
+  color: #aaa9a6;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.work-showcase-label {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 10px 18px;
+  border: 1px solid rgba(214, 173, 96, 0.35);
+  border-radius: 30px;
+  color: #d6ad60;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+  .work-intro {
+    margin-bottom: 30px;
+  }
+
+  .work-showcase {
+    min-height: 320px;
+    padding: 30px 20px;
+  }
+
+  .work-showcase h3 {
+    font-size: 28px;
+  }
+
+  .work-showcase p {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-showcase {
+    transition: none;
+  }
+}
+
+
+/* STEP 56 — Premium Services Section */
+
+.services-section {
+  padding: 110px 7%;
+  background: #090909;
+  border-top: 1px solid #ffffff16;
+}
+
+.services-heading {
+  max-width: 720px;
+  margin-bottom: 55px;
+}
+
+.services-heading h2 {
+  margin: 20px 0;
+  font-size: clamp(36px, 5vw, 66px);
+  line-height: 1.15;
+  letter-spacing: -2px;
+}
+
+.services-heading h2 span {
+  color: #d6ad60;
+}
+
+.services-description {
+  max-width: 560px;
+  color: #aaa9a6;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.service-card {
+  position: relative;
+  min-width: 0;
+  min-height: 280px;
+  padding: 38px;
+  overflow: hidden;
+  border: 1px solid rgba(214, 173, 96, 0.16);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #171512, #0e0d0c);
+  transition:
+    transform 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  top: -130px;
+  right: -100px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(214, 173, 96, 0.12),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.service-card:hover {
+  transform: translateY(-7px);
+  border-color: rgba(214, 173, 96, 0.55);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.3);
+}
+
+.service-number {
+  display: block;
+  margin-bottom: 38px;
+  color: #d6ad60;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+
+.service-card h3 {
+  margin: 0 0 15px;
+  color: #f7f4ed;
+  font-size: clamp(22px, 2.5vw, 30px);
+  line-height: 1.25;
+  letter-spacing: -0.7px;
+}
+
+.service-card p {
+  max-width: 420px;
+  color: #aaa9a6;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+@media (max-width: 700px) {
+  .services-section {
+    padding: 75px 6%;
+  }
+
+  .services-heading {
+    margin-bottom: 35px;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .service-card {
+    min-height: 240px;
+    padding: 28px;
+  }
+
+  .service-number {
+    margin-bottom: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-card {
+    transition: none;
+  }
+
+  .service-card:hover {
+    transform: none;
+  }
+}
+
+
+/* STEP 58 — Luxury About Me Section */
+
+.about-section {
+  position: relative;
+  padding: 120px 7%;
+  overflow: hidden;
+  background: #11100e;
+  border-top: 1px solid #ffffff16;
+}
+
+.about-section::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  top: -180px;
+  left: -200px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(214, 173, 96, 0.09),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.about-container {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 70px;
+}
+
+.about-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 440px;
+  padding: 35px;
+  border: 1px solid rgba(214, 173, 96, 0.2);
+  border-radius: 12px;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(214, 173, 96, 0.12),
+      transparent 65%
+    ),
+    linear-gradient(145deg, #1a1712, #0b0a09);
+  overflow: hidden;
+}
+
+.about-visual::after {
+  content: '';
+  position: absolute;
+  inset: 16px;
+  border: 1px solid rgba(214, 173, 96, 0.12);
+  border-radius: 7px;
+  pointer-events: none;
+}
+
+.about-monogram {
+  color: #d6ad60;
+  font-size: clamp(90px, 13vw, 180px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -12px;
+  text-shadow: 0 0 60px rgba(214, 173, 96, 0.18);
+}
+
+.about-visual-label {
+  position: absolute;
+  bottom: 35px;
+  left: 35px;
+  color: #a99b83;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.about-content h2 {
+  margin: 22px 0 28px;
+  font-size: clamp(38px, 5vw, 68px);
+  line-height: 1.12;
+  letter-spacing: -2px;
+}
+
+.about-content h2 span {
+  color: #d6ad60;
+}
+
+.about-content p:not(.eyebrow) {
+  margin-bottom: 20px;
+  color: #aaa9a6;
+  font-size: 16px;
+  line-height: 1.95;
+}
+
+.about-signature {
+  margin-top: 35px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(214, 173, 96, 0.2);
+  color: #d6ad60;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 800px) {
+  .about-section {
+    padding: 80px 6%;
+  }
+
+  .about-container {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .about-visual {
+    min-height: 320px;
+  }
+
+  .about-monogram {
+    font-size: 120px;
+  }
+
+  .about-content h2 {
+    font-size: clamp(36px, 8vw, 54px);
+  }
+}
+
+@media (max-width: 480px) {
+  .about-visual {
+    min-height: 270px;
+  }
+
+  .about-monogram {
+    font-size: 100px;
+  }
+
+  .about-content p:not(.eyebrow) {
+    font-size: 15px;
+  }
+}
+
+
+/* STEP 61 — Premium Navigation Menu */
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 2.5vw, 38px);
+  margin-left: auto;
+  margin-right: 28px;
+}
+
+.nav-menu a {
+  position: relative;
+  padding: 10px 0;
+  color: #bcb8ae;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.nav-menu a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 3px;
+  width: 100%;
+  height: 1px;
+  background: #d6ad60;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.35s ease;
+}
+
+.nav-menu a:hover,
+.nav-menu a:focus-visible {
+  color: #f1cf8c;
+}
+
+.nav-menu a:hover::after,
+.nav-menu a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Tablet: Allow navigation to wrap neatly */
+
+@media (max-width: 1050px) {
+  .navbar {
+    flex-wrap: wrap;
+  }
+
+  .nav-menu {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 25px;
+    margin: 0;
+    padding-bottom: 12px;
+  }
+}
+
+/* Mobile: Horizontal scroll without breaking layout */
+
+@media (max-width: 600px) {
+  .nav-menu {
+    justify-content: flex-start;
+    gap: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-menu a {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-menu a,
+  .nav-menu a::after {
+    transition: none;
+  }
+}
+
+
+/* STEP 63 — Premium Navbar Typography */
+
+.nav-menu a {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.7px;
+}
+
+.nav-menu {
+  gap: clamp(18px, 2.2vw, 34px);
+}
+
+@media (max-width: 600px) {
+  .nav-menu a {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .nav-menu {
+    gap: 24px;
+  }
+}
+
+
+/* STEP 78 — Premium Mobile Navigation */
+
+.mobile-menu-button {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .navbar {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 6%;
+  }
+
+  .brand-logo {
+    height: 70px;
+    max-width: 100%;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    padding: 0;
+    background: transparent;
+    border: 1px solid rgba(214, 173, 96, 0.55);
+    border-radius: 8px;
+    color: #d6ad60;
+    font-size: 25px;
+    cursor: pointer;
+  }
+
+  .navbar > .nav-link {
+    display: none;
+  }
+
+  .nav-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    width: 100%;
+    margin: 0;
+    padding: 18px 6% 24px;
+    box-sizing: border-box;
+    background: #0e0d0b;
+    border-bottom: 1px solid rgba(214, 173, 96, 0.3);
+    box-shadow: 0 18px 35px rgba(0, 0, 0, 0.5);
+    overflow: visible;
+  }
+
+  .nav-menu.mobile-menu-open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .nav-menu a {
+    display: block;
+    width: 100%;
+    padding: 15px 4px;
+    box-sizing: border-box;
+    color: #f7f4ed;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(214, 173, 96, 0.12);
+  }
+
+  .nav-menu a:last-child {
+    border-bottom: none;
+  }
+
+  .nav-menu a:hover {
+    color: #d6ad60;
+  }
+}
+
+
+/* STEP 80 — Sticky Navigation Fix */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(9, 9, 9, 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Keep sections visible below sticky navbar */
+html {
+  scroll-padding-top: 110px;
+  scroll-behavior: smooth;
+}
+
+/* Mobile sticky navbar */
+@media (max-width: 700px) {
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    background: rgba(9, 9, 9, 0.97);
+  }
+
+  html {
+    scroll-padding-top: 95px;
+  }
+}
