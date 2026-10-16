@@ -1,10 +1,10 @@
-
 import { useEffect, useState } from 'react'
 import {
   motion,
   AnimatePresence,
   useReducedMotion
 } from 'motion/react'
+import StartProjectForm from './StartProjectForm'
 import './App.css'
 
 const services = [
@@ -834,36 +834,7 @@ function App() {
             ))}
           </div>
 
-          <motion.a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={
-              reduceMotion
-                ? undefined
-                : { scale: 1.04 }
-            }
-            whileTap={
-              reduceMotion
-                ? undefined
-                : { scale: 0.98 }
-            }
-            style={{
-              display: 'inline-block',
-              marginTop: '45px',
-              padding: '17px 35px',
-              background:
-                'linear-gradient(135deg, #e4c78f, #b98d4c)',
-              color: '#15110b',
-              textDecoration: 'none',
-              borderRadius: '7px',
-              fontWeight: 700,
-              fontSize: '14px',
-              letterSpacing: '0.5px'
-            }}
-          >
-            Start a Project ↗
-          </motion.a>
+          <StartProjectForm />
 
           <p
             style={{
