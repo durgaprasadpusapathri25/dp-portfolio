@@ -1098,3 +1098,169 @@ html {
     scroll-padding-top: 95px;
   }
 }
+/* Responsive consistency: keep the same DP dark-and-gold palette across devices */
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  min-width: 320px;
+  margin: 0;
+  background: #090909;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: clip;
+  background: #090909;
+}
+
+.portfolio {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: clip;
+  color-scheme: dark;
+}
+
+.portfolio img {
+  max-width: 100%;
+}
+
+.navbar,
+.hero-section,
+.preview-section,
+.contact-section,
+.services-section,
+.about-section,
+footer {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .navbar {
+    padding: 10px 5%;
+  }
+
+  .brand-logo {
+    height: clamp(56px, 16vw, 70px);
+    max-width: min(68vw, 220px);
+  }
+
+  .hero-section {
+    min-height: 75vh;
+    min-height: 75svh;
+    padding: clamp(72px, 12vh, 96px) 6% 60px;
+  }
+
+  .hero-section h1 {
+    max-width: 100%;
+    font-size: clamp(34px, 9vw, 52px);
+    line-height: 1.14;
+    letter-spacing: -1.2px;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .hero-description,
+  .work-description,
+  .services-description {
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  .hero-actions {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 260px;
+    text-align: center;
+  }
+
+  .hero-signature {
+    margin-top: 58px;
+    font-size: 11px;
+    line-height: 1.8;
+    letter-spacing: 1.4px;
+  }
+
+  .scroll-indicator {
+    margin-top: 36px;
+  }
+
+  .preview-section,
+  .contact-section,
+  .services-section,
+  .about-section {
+    padding: 72px 6%;
+  }
+
+  .work-showcase {
+    min-height: 280px;
+    padding: 28px 18px;
+  }
+
+  .about-container {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 34px;
+  }
+
+  .about-visual {
+    min-height: 270px;
+    padding: 24px;
+  }
+
+  .about-monogram {
+    font-size: clamp(88px, 25vw, 120px);
+    letter-spacing: -8px;
+  }
+
+  .services-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .service-card {
+    min-height: 0;
+    padding: 26px 22px;
+  }
+
+  footer {
+    padding: 24px 6%;
+  }
+}
+
+@media (max-width: 380px) {
+  .navbar {
+    gap: 8px;
+  }
+
+  .brand-logo {
+    height: 56px;
+    max-width: 65vw;
+  }
+
+  .mobile-menu-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+  }
+
+  .hero-section h1 {
+    font-size: clamp(32px, 8.8vw, 38px);
+  }
+}
+
