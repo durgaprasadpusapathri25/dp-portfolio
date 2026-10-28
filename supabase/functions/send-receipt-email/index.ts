@@ -157,7 +157,7 @@ Deno.serve(async (request) => {
       timeZone: "UTC",
     })
 
-    // A public logo is embedded in the PDF and attached inline for email clients.
+    // The logo is fetched for the PDF. It is not attached separately to the email.
     let logoBytes: Uint8Array | null = null
     try {
       const logoResponse = await fetch(LOGO_URL)
@@ -273,9 +273,7 @@ Deno.serve(async (request) => {
     const safeMethodHtml = payment?.payment_method
       ? `<tr><td style="padding:12px 0;color:#766b5b;border-bottom:1px solid #e9dfcd">Payment method</td><td style="padding:12px 0;text-align:right;color:#211b12;border-bottom:1px solid #e9dfcd">${escapeHtml(payment.payment_method)}</td></tr>`
       : ""
-    const logoHtml = logoBytes
-      ? `<img src="cid:dpcreativestudio-logo" alt="DP Creative Studio" width="76" style="display:block;width:76px;height:auto;max-height:58px;object-fit:contain;margin:0 auto 12px">`
-      : ""
+    const logoHtml = `<img src="${LOGO_URL}" alt="DP Creative Studio" width="76" style="display:block;width:76px;height:auto;max-height:58px;object-fit:contain;margin:0 auto 12px">`
     const breakdownHtml = projectTotal !== null
       ? `<tr><td style="padding:12px 0;color:#766b5b;border-bottom:1px solid #e9dfcd">Project total</td><td style="padding:12px 0;text-align:right;border-bottom:1px solid #e9dfcd">${escapeHtml(formatMoney(projectTotal, currency))}</td></tr><tr><td style="padding:12px 0;color:#766b5b;border-bottom:1px solid #e9dfcd">Paid this payment</td><td style="padding:12px 0;text-align:right;border-bottom:1px solid #e9dfcd">${escapeHtml(formattedAmount)}</td></tr><tr><td style="padding:12px 0;color:#211b12;font-weight:bold;border-bottom:1px solid #e9dfcd">Total received to date</td><td style="padding:12px 0;text-align:right;color:#211b12;font-weight:bold;border-bottom:1px solid #e9dfcd">${escapeHtml(formatMoney(receivedToDate, currency))}</td></tr><tr><td style="padding:12px 0;color:#211b12;font-weight:bold;border-top:1px solid #d7b477">Balance remaining</td><td style="padding:12px 0;text-align:right;color:#9b7237;font-size:17px;font-weight:bold;border-top:1px solid #d7b477">${escapeHtml(formatMoney(balanceDue ?? 0, currency))}</td></tr>`
       : `<tr><td style="padding:16px 0;color:#211b12;font-weight:bold;border-top:1px solid #d7b477">Total paid</td><td style="padding:16px 0;text-align:right;color:#9b7237;font-size:18px;font-weight:bold;border-top:1px solid #d7b477">${escapeHtml(formattedAmount)}</td></tr>`
@@ -300,15 +298,6 @@ Deno.serve(async (request) => {
         content: Buffer.from(pdfBytes),
         contentType: "application/pdf",
       }]
-      if (logoBytes) {
-        attachments.push({
-          filename: "dp-logo.png",
-          content: Buffer.from(logoBytes),
-          contentType: "image/png",
-          cid: "dpcreativestudio-logo",
-          disposition: "inline",
-        })
-      }
 
       await transporter.sendMail({
         from: fromEmail,

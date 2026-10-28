@@ -5,6 +5,7 @@ import {
   useReducedMotion
 } from 'motion/react'
 import StartProjectForm from './StartProjectForm'
+import { supabase } from './supabase'
 import './App.css'
 
 const services = [
@@ -54,44 +55,87 @@ const clientMessage =
 const whatsappLink =
   `https://wa.me/${contactDetails.whatsapp}?text=${encodeURIComponent(clientMessage)}`
 
-const projects = [
-  {
-    number: '01',
-    category: 'SOCIAL MEDIA DESIGN',
-    title: 'Finally Got My Mic!',
-    image: '/instagram-thumbnail.jpg',
-    alt: 'Instagram thumbnail featuring the Hollyland Lark A1 microphone',
-    description:
-      'A bold Instagram thumbnail featuring energetic typography, vibrant orange-and-yellow visuals, and a product-focused composition.',
-    tags: [
-      'Instagram Design',
-      'Thumbnail',
-      'Creative Graphics'
-    ],
-    status: ''
-  },
-  {
-    number: '02',
-    category: 'BUSINESS WEBSITE',
-    title: 'Sri Durga Mill',
-    image: '/sri-durga-mill.png',
-    alt: 'Sri Durga Mill business website homepage design',
-    description:
-      'A modern business website concept for Sri Durga Mill, featuring milling services, product information, customer enquiries, and order-related interface elements. Created using Lovable AI.',
-    tags: [
-      'Website Design',
-      'Business Website',
-      'Lovable AI'
-    ],
-    status: 'Unpublished Project'
-  }
-]
+type PortfolioProject = {
+  id: string
+  number: string
+  title: string
+  category: string
+  media_url: string
+  media_type: 'image' | 'video'
+  alt_text: string | null
+  description: string | null
+  tags: string[]
+  project_url: string | null
+  sort_order: number
+}
+
 
 function App() {
   const reduceMotion = useReducedMotion()
 
+  const [projects, setProjects] = useState<PortfolioProject[]>([])
+  const [portfolioLoading, setPortfolioLoading] = useState(true)
+  const [portfolioError, setPortfolioError] = useState('')
   const [selectedProject, setSelectedProject] =
-    useState<(typeof projects)[number] | null>(null)
+    useState<PortfolioProject | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadPortfolioProjects = async () => {
+      setPortfolioLoading(true)
+      setPortfolioError('')
+
+      const { data, error } = await supabase
+        .from('portfolio_items')
+        .select(
+          'id, title, category, media_url, media_type, alt_text, description, tags, project_url, sort_order'
+        )
+        .eq('is_published', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+
+      if (cancelled) return
+
+      if (error) {
+        setPortfolioError('Portfolio projects could not be loaded right now.')
+        setPortfolioLoading(false)
+        return
+      }
+
+      const items = (data ?? []) as Omit<PortfolioProject, 'number'>[]
+      setProjects(
+        items.map((item, index) => ({
+          ...item,
+          number: String(index + 1).padStart(2, '0'),
+          tags: Array.isArray(item.tags) ? item.tags : []
+        }))
+      )
+      setPortfolioLoading(false)
+    }
+
+    void loadPortfolioProjects()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const openPortfolioProject = (project: PortfolioProject) => {
+    if (project.project_url) {
+      try {
+        const url = new URL(project.project_url)
+        if (url.protocol === 'https:' || url.protocol === 'http:') {
+          window.open(url.href, '_blank', 'noopener,noreferrer')
+          return
+        }
+      } catch {
+        // If the saved URL is invalid, show the project preview instead.
+      }
+    }
+
+    setSelectedProject(project)
+  }
 
   // STEP 79 — MOBILE MENU STATE
   const [mobileMenuOpen, setMobileMenuOpen] =
@@ -367,9 +411,21 @@ function App() {
             boxSizing: 'border-box'
           }}
         >
-          {projects.map((project, index) => (
+          {portfolioLoading ? (
+            <p style={{ color: '#aaa49a', gridColumn: '1 / -1' }}>
+              Loading selected work...
+            </p>
+          ) : portfolioError ? (
+            <p style={{ color: '#e4c78f', gridColumn: '1 / -1' }}>
+              {portfolioError}
+            </p>
+          ) : projects.length === 0 ? (
+            <p style={{ color: '#aaa49a', gridColumn: '1 / -1' }}>
+              New work is being prepared. Please check back soon.
+            </p>
+          ) : projects.map((project, index) => (
             <motion.article
-              key={project.number}
+              key={project.id}
               initial={{
                 opacity: reduceMotion ? 1 : 0,
                 y: reduceMotion ? 0 : 55
@@ -406,14 +462,14 @@ function App() {
                 flexDirection: 'column',
                 cursor: 'pointer'
               }}
-              onClick={() => setSelectedProject(project)}
+              onClick={() => openPortfolioProject(project)}
               onKeyDown={(event) => {
                 if (
                   event.key === 'Enter' ||
                   event.key === ' '
                 ) {
                   event.preventDefault()
-                  setSelectedProject(project)
+                  openPortfolioProject(project)
                 }
               }}
               role="button"
@@ -432,18 +488,37 @@ function App() {
                   justifyContent: 'center'
                 }}
               >
-                <img
-                  src={project.image}
-                  alt={project.alt}
-                  loading="lazy"
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    borderRadius: '8px'
-                  }}
-                />
+                {project.media_type === 'video' ? (
+                  <video
+                    src={project.media_url}
+                    aria-label={project.alt_text || project.title}
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      borderRadius: '8px'
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={project.media_url}
+                    alt={project.alt_text || project.title}
+                    loading="lazy"
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      borderRadius: '8px'
+                    }}
+                  />
+                )}
               </div>
 
               <div
@@ -476,24 +551,6 @@ function App() {
                   {project.title}
                 </h3>
 
-                {project.status && (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      alignSelf: 'flex-start',
-                      padding: '6px 11px',
-                      marginBottom: '14px',
-                      borderRadius: '20px',
-                      border:
-                        '1px solid rgba(214, 173, 96, 0.35)',
-                      color: '#d8b778',
-                      fontSize: '12px'
-                    }}
-                  >
-                    {project.status}
-                  </span>
-                )}
-
                 <p
                   style={{
                     color: '#aaa49a',
@@ -502,7 +559,7 @@ function App() {
                     fontSize: '14px'
                   }}
                 >
-                  {project.description}
+                  {project.description || ''}
                 </p>
 
                 <div
@@ -961,19 +1018,38 @@ function App() {
                   boxSizing: 'border-box'
                 }}
               >
-                <img
-                  src={selectedProject.image}
-                  alt={selectedProject.alt}
-                  style={{
-                    display: 'block',
-                    maxWidth: '100%',
-                    maxHeight: '60vh',
-                    width: 'auto',
-                    height: 'auto',
-                    objectFit: 'contain',
-                    borderRadius: '8px'
-                  }}
-                />
+                {selectedProject.media_type === 'video' ? (
+                  <video
+                    src={selectedProject.media_url}
+                    aria-label={selectedProject.alt_text || selectedProject.title}
+                    controls
+                    autoPlay
+                    playsInline
+                    style={{
+                      display: 'block',
+                      maxWidth: '100%',
+                      maxHeight: '60vh',
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain',
+                      borderRadius: '8px'
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={selectedProject.media_url}
+                    alt={selectedProject.alt_text || selectedProject.title}
+                    style={{
+                      display: 'block',
+                      maxWidth: '100%',
+                      maxHeight: '60vh',
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain',
+                      borderRadius: '8px'
+                    }}
+                  />
+                )}
               </div>
 
               <div
@@ -1003,17 +1079,6 @@ function App() {
                   {selectedProject.title}
                 </h2>
 
-                {selectedProject.status && (
-                  <p
-                    style={{
-                      color: '#d8b778',
-                      fontSize: '13px'
-                    }}
-                  >
-                    {selectedProject.status}
-                  </p>
-                )}
-
                 <p
                   style={{
                     color: '#aaa49a',
@@ -1022,7 +1087,7 @@ function App() {
                     maxWidth: '800px'
                   }}
                 >
-                  {selectedProject.description}
+                  {selectedProject.description || ''}
                 </p>
 
                 <div
@@ -1049,6 +1114,27 @@ function App() {
                     </span>
                   ))}
                 </div>
+
+                {selectedProject.project_url && (
+                  <a
+                    href={selectedProject.project_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      marginTop: '24px',
+                      padding: '12px 18px',
+                      borderRadius: '8px',
+                      background: '#d6ad60',
+                      color: '#15120d',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Open Live Website ↗
+                  </a>
+                )}
               </div>
             </motion.div>
           </motion.div>

@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 import EnquiriesSection from './EnquiriesSection'
 import ReceiptsSection from './ReceiptsSection'
+import PortfolioSection from './PortfolioSection'
 
 type DashboardSection =
   | 'Overview'
   | 'Enquiries'
   | 'Clients'
   | 'Projects'
+  | 'Portfolio'
   | 'Payments'
   | 'Receipts'
   | 'Settings'
@@ -65,6 +67,7 @@ const sections: DashboardSection[] = [
   'Enquiries',
   'Clients',
   'Projects',
+  'Portfolio',
   'Payments',
   'Receipts',
   'Settings',
@@ -2133,8 +2136,11 @@ export default function AdminDashboard() {
                 )}
               </section>
             </>
+          ) : activeSection === 'Portfolio' ? (
+            <PortfolioSection />
           ) : activeSection === 'Receipts' ? (
-            <ReceiptsSection />          ) : activeSection === 'Payments' ? (
+            <ReceiptsSection />
+          ) : activeSection === 'Payments' ? (
             <>
               <section className="dp-admin-card" style={{ marginBottom: 22 }}>
                 <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>
@@ -2266,3 +2272,4 @@ export default function AdminDashboard() {
     </div>
   )
 }
+
