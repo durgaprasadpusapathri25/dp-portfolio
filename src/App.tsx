@@ -69,7 +69,6 @@ type PortfolioProject = {
   sort_order: number
 }
 
-
 function App() {
   const reduceMotion = useReducedMotion()
 
@@ -78,6 +77,11 @@ function App() {
   const [portfolioError, setPortfolioError] = useState('')
   const [selectedProject, setSelectedProject] =
     useState<PortfolioProject | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState('All')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const isAllWorksPage =
+    window.location.pathname.replace(/\/+$/, '') === '/work'
 
   useEffect(() => {
     let cancelled = false
@@ -98,12 +102,18 @@ function App() {
       if (cancelled) return
 
       if (error) {
-        setPortfolioError('Portfolio projects could not be loaded right now.')
+        setPortfolioError(
+          'Portfolio projects could not be loaded right now.'
+        )
         setPortfolioLoading(false)
         return
       }
 
-      const items = (data ?? []) as Omit<PortfolioProject, 'number'>[]
+      const items = (data ?? []) as Omit<
+        PortfolioProject,
+        'number'
+      >[]
+
       setProjects(
         items.map((item, index) => ({
           ...item,
@@ -111,6 +121,7 @@ function App() {
           tags: Array.isArray(item.tags) ? item.tags : []
         }))
       )
+
       setPortfolioLoading(false)
     }
 
@@ -125,7 +136,11 @@ function App() {
     if (project.project_url) {
       try {
         const url = new URL(project.project_url)
-        if (url.protocol === 'https:' || url.protocol === 'http:') {
+
+        if (
+          url.protocol === 'https:' ||
+          url.protocol === 'http:'
+        ) {
           window.open(url.href, '_blank', 'noopener,noreferrer')
           return
         }
@@ -136,10 +151,6 @@ function App() {
 
     setSelectedProject(project)
   }
-
-  // STEP 79 — MOBILE MENU STATE
-  const [mobileMenuOpen, setMobileMenuOpen] =
-    useState(false)
 
   useEffect(() => {
     if (!selectedProject) return
@@ -161,7 +172,6 @@ function App() {
     }
   }, [selectedProject])
 
-  // CLOSE MOBILE MENU WITH ESCAPE
   useEffect(() => {
     if (!mobileMenuOpen) return
 
@@ -242,10 +252,27 @@ function App() {
     }
   ]
 
+  const workCategories = [
+    'All',
+    ...Array.from(
+      new Set(
+        projects
+          .map((project) => project.category)
+          .filter(Boolean)
+      )
+    )
+  ]
+
+  const visibleProjects = isAllWorksPage
+    ? projects.filter(
+        (project) =>
+          selectedCategory === 'All' ||
+          project.category === selectedCategory
+      )
+    : projects.slice(0, 4)
+
   return (
     <main className="portfolio">
-
-      {/* STEP 79 — RESPONSIVE NAVIGATION */}
       <motion.nav
         className="navbar"
         aria-label="Main navigation"
@@ -261,7 +288,7 @@ function App() {
       >
         <a
           className="brand"
-          href="#home"
+          href={isAllWorksPage ? '/#home' : '#home'}
           onClick={() => setMobileMenuOpen(false)}
         >
           <img
@@ -281,16 +308,37 @@ function App() {
         >
           {navigation.map((item) => (
             <a
-              href={item.href}
+              href={
+                isAllWorksPage
+                  ? `/${item.href}`
+                  : item.href
+              }
               key={item.href}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(event) => {
+                setMobileMenuOpen(false)
+
+                if (!isAllWorksPage) {
+                  const target = document.querySelector(item.href)
+
+                  if (target) {
+                    event.preventDefault()
+                    target.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'start'
+                    })
+                  }
+                }
+              }}
             >
               {item.label}
             </a>
           ))}
         </div>
 
-        <a className="nav-link" href="#contact">
+        <a
+          className="nav-link"
+          href={isAllWorksPage ? '/#contact' : '#contact'}
+        >
           Let's Connect ↗
         </a>
 
@@ -312,92 +360,130 @@ function App() {
         </button>
       </motion.nav>
 
-      {/* HERO SECTION */}
-      <section className="hero-section" id="home">
-        <motion.p className="eyebrow" {...reveal(0.15)}>
-          WELCOME TO MY DIGITAL WORLD
-        </motion.p>
+      {!isAllWorksPage && (
+        <>
+          <section className="hero-section" id="home">
+            <motion.p
+              className="eyebrow"
+              {...reveal(0.15)}
+            >
+              WELCOME TO MY DIGITAL WORLD
+            </motion.p>
 
-        <motion.h1
-          initial={{
-            opacity: reduceMotion ? 1 : 0,
-            y: reduceMotion ? 0 : 70,
-            filter: reduceMotion ? 'none' : 'blur(12px)'
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-            filter: 'blur(0px)'
-          }}
-          transition={{
-            duration: reduceMotion ? 0 : 1.2,
-            delay: reduceMotion ? 0 : 0.3,
-            ease: [0.22, 1, 0.36, 1]
-          }}
-        >
-          I Turn Creative Ideas
-          <br />
-          Into <span>Digital Experiences.</span>
-        </motion.h1>
+            <motion.h1
+              initial={{
+                opacity: reduceMotion ? 1 : 0,
+                y: reduceMotion ? 0 : 70,
+                filter: reduceMotion ? 'none' : 'blur(12px)'
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter: 'blur(0px)'
+              }}
+              transition={{
+                duration: reduceMotion ? 0 : 1.2,
+                delay: reduceMotion ? 0 : 0.3,
+                ease: [0.22, 1, 0.36, 1]
+              }}
+            >
+              I Turn Creative Ideas
+              <br />
+              Into <span>Digital Experiences.</span>
+            </motion.h1>
 
-        <motion.p
-          className="hero-description"
-          {...reveal(0.65, 35)}
-        >
-          I'm Durga Prasad, a freelance digital creator crafting
-          modern websites, striking visuals, engaging videos,
-          and memorable digital experiences.
-        </motion.p>
+            <motion.p
+              className="hero-description"
+              {...reveal(0.65, 35)}
+            >
+              I'm Durga Prasad, a freelance digital creator
+              crafting modern websites, striking visuals,
+              engaging videos, and memorable digital experiences.
+            </motion.p>
 
-        <motion.div
-          className="hero-actions"
-          {...reveal(0.85, 30)}
-        >
-          <a href="#work" className="primary-button">
-            Explore My Work ↗
-          </a>
+            <motion.div
+              className="hero-actions"
+              {...reveal(0.85, 30)}
+            >
+              <a href="#work" className="primary-button">
+                Explore My Work ↗
+              </a>
 
-          <a href="#contact" className="secondary-button">
-            Let's Work Together
-          </a>
-        </motion.div>
+              <a href="#contact" className="secondary-button">
+                Let's Work Together
+              </a>
+            </motion.div>
 
-        <motion.p
-          className="hero-signature"
-          {...reveal(1.1, 20)}
-        >
-          DURGA PRASAD{' '}
-          <span>— FREELANCE DIGITAL CREATOR</span>
-        </motion.p>
+            <motion.p
+              className="hero-signature"
+              {...reveal(1.1, 20)}
+            >
+              DURGA PRASAD{' '}
+              <span>— FREELANCE DIGITAL CREATOR</span>
+            </motion.p>
 
-        <motion.a
-          href="#work"
-          className="scroll-indicator"
-          aria-label="Scroll to explore my work"
-          {...reveal(1.4, 15)}
-        >
-          <span>SCROLL TO EXPLORE</span>
-          <span className="scroll-arrow" aria-hidden="true">
-            ↓
-          </span>
-        </motion.a>
-      </section>
+            <motion.a
+              href="#work"
+              className="scroll-indicator"
+              aria-label="Scroll to explore my work"
+              {...reveal(1.4, 15)}
+            >
+              <span>SCROLL TO EXPLORE</span>
+              <span className="scroll-arrow" aria-hidden="true">
+                ↓
+              </span>
+            </motion.a>
+          </section>
+        </>
+      )}
 
-      {/* SELECTED WORKS */}
       <section className="preview-section" id="work">
         <motion.div className="work-intro" {...scrollReveal}>
           <p className="eyebrow">MY CREATIVE SPACE</p>
 
           <h2>
-            Selected <span>Works.</span>
+            {isAllWorksPage ? (
+              <>
+                All <span>Works.</span>
+              </>
+            ) : (
+              <>
+                Selected <span>Works.</span>
+              </>
+            )}
           </h2>
 
           <p className="work-description">
-            A collection of digital experiences, creative
-            visuals, and meaningful projects. Every creation
-            has a story.
+            {isAllWorksPage
+              ? 'Explore all my websites, videos, thumbnails, designs, and other creative projects.'
+              : 'A collection of digital experiences, creative visuals, and meaningful projects. Every creation has a story.'}
           </p>
         </motion.div>
+
+        {isAllWorksPage &&
+          !portfolioLoading &&
+          !portfolioError && (
+            <div
+              className="works-filters"
+              aria-label="Filter projects by category"
+            >
+              {workCategories.map((category) => (
+                <button
+                  type="button"
+                  key={category}
+                  className={
+                    selectedCategory === category
+                      ? 'works-filter active'
+                      : 'works-filter'
+                  }
+                  onClick={() => setSelectedCategory(category)}
+                  aria-pressed={selectedCategory === category}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          )}
 
         <div
           style={{
@@ -412,507 +498,545 @@ function App() {
           }}
         >
           {portfolioLoading ? (
-            <p style={{ color: '#aaa49a', gridColumn: '1 / -1' }}>
+            <p
+              style={{
+                color: '#aaa49a',
+                gridColumn: '1 / -1'
+              }}
+            >
               Loading selected work...
             </p>
           ) : portfolioError ? (
-            <p style={{ color: '#e4c78f', gridColumn: '1 / -1' }}>
+            <p
+              style={{
+                color: '#e4c78f',
+                gridColumn: '1 / -1'
+              }}
+            >
               {portfolioError}
             </p>
           ) : projects.length === 0 ? (
-            <p style={{ color: '#aaa49a', gridColumn: '1 / -1' }}>
+            <p
+              style={{
+                color: '#aaa49a',
+                gridColumn: '1 / -1'
+              }}
+            >
               New work is being prepared. Please check back soon.
             </p>
-          ) : projects.map((project, index) => (
-            <motion.article
-              key={project.id}
-              initial={{
-                opacity: reduceMotion ? 1 : 0,
-                y: reduceMotion ? 0 : 55
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0
-              }}
-              viewport={{
-                once: true,
-                amount: 0.15
-              }}
-              whileHover={
-                reduceMotion ? undefined : { y: -7 }
-              }
-              transition={{
-                duration: reduceMotion ? 0 : 0.8,
-                delay: reduceMotion ? 0 : index * 0.15,
-                ease: [0.22, 1, 0.36, 1]
-              }}
+          ) : visibleProjects.length === 0 ? (
+            <p
               style={{
-                minWidth: 0,
-                padding: '16px',
-                boxSizing: 'border-box',
-                border:
-                  '1px solid rgba(214, 173, 96, 0.3)',
-                borderRadius: '18px',
-                background:
-                  'linear-gradient(145deg, #1a1712, #100f0d)',
-                boxShadow:
-                  '0 20px 55px rgba(0, 0, 0, 0.25)',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                cursor: 'pointer'
-              }}
-              onClick={() => openPortfolioProject(project)}
-              onKeyDown={(event) => {
-                if (
-                  event.key === 'Enter' ||
-                  event.key === ' '
-                ) {
-                  event.preventDefault()
-                  openPortfolioProject(project)
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label={`View ${project.title} project`}
-            >
-              <div
-                style={{
-                  width: '100%',
-                  height: '340px',
-                  background: '#0d0c0b',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                {project.media_type === 'video' ? (
-                  <video
-                    src={project.media_url}
-                    aria-label={project.alt_text || project.title}
-                    muted
-                    loop
-                    autoPlay
-                    playsInline
-                    preload="metadata"
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      borderRadius: '8px'
-                    }}
-                  />
-                ) : (
-                  <img
-                    src={project.media_url}
-                    alt={project.alt_text || project.title}
-                    loading="lazy"
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      borderRadius: '8px'
-                    }}
-                  />
-                )}
-              </div>
-
-              <div
-                style={{
-                  padding: '24px 8px 10px',
-                  textAlign: 'left',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  flexGrow: 1
-                }}
-              >
-                <span
-                  style={{
-                    color: '#c6a36a',
-                    fontSize: '11px',
-                    letterSpacing: '2px',
-                    marginBottom: '12px'
-                  }}
-                >
-                  PROJECT {project.number} / {project.category}
-                </span>
-
-                <h3
-                  style={{
-                    color: '#f7f2e8',
-                    fontSize: 'clamp(22px, 3vw, 28px)',
-                    margin: '0 0 12px'
-                  }}
-                >
-                  {project.title}
-                </h3>
-
-                <p
-                  style={{
-                    color: '#aaa49a',
-                    lineHeight: 1.8,
-                    margin: 0,
-                    fontSize: '14px'
-                  }}
-                >
-                  {project.description || ''}
-                </p>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '9px',
-                    marginTop: 'auto',
-                    paddingTop: '22px'
-                  }}
-                >
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      style={{
-                        border:
-                          '1px solid rgba(214, 173, 96, 0.25)',
-                        borderRadius: '30px',
-                        padding: '7px 11px',
-                        color: '#d8b778',
-                        fontSize: '11px'
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <span
-                  style={{
-                    color: '#e4c78f',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    marginTop: '22px'
-                  }}
-                >
-                  View Project ↗
-                </span>
-              </div>
-            </motion.article>
-          ))}
-        </div>
-      </section>
-
-      {/* SERVICES */}
-      <section className="services-section" id="services">
-        <motion.div
-          className="services-heading"
-          {...scrollReveal}
-        >
-          <p className="eyebrow">WHAT I CREATE</p>
-
-          <h2>
-            Creative <span>Services.</span>
-          </h2>
-
-          <p className="services-description">
-            From the first idea to the final experience,
-            I bring creativity and digital craftsmanship together.
-          </p>
-        </motion.div>
-
-        <div className="services-grid">
-          {services.map((service, index) => (
-            <motion.article
-              className="service-card"
-              key={service.number}
-              initial={{
-                opacity: reduceMotion ? 1 : 0,
-                y: reduceMotion ? 0 : 50
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0
-              }}
-              viewport={{
-                once: true,
-                amount: 0.2
-              }}
-              transition={{
-                duration: reduceMotion ? 0 : 0.8,
-                delay: reduceMotion ? 0 : index * 0.12,
-                ease: [0.22, 1, 0.36, 1]
+                color: '#aaa49a',
+                gridColumn: '1 / -1'
               }}
             >
-              <span className="service-number">
-                {service.number} / 04
-              </span>
-
-              <h3>{service.title}</h3>
-              <p>{service.description}</p>
-            </motion.article>
-          ))}
-        </div>
-      </section>
-
-      {/* ABOUT */}
-      <section className="about-section" id="about">
-        <div className="about-container">
-          <motion.div
-            className="about-visual"
-            {...scrollReveal}
-            style={{
-              padding: '0',
-              overflow: 'hidden',
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border:
-                '1px solid rgba(214, 173, 96, 0.3)',
-              borderRadius: '12px'
-            }}
-          >
-            <img
-              src="/dp-portrait.png"
-              alt="Durga Prasad — Freelance Digital Creator"
-              className="about-portrait"
-              style={{
-                display: 'block',
-                width: '100%',
-                height: '100%',
-                minHeight: '440px',
-                maxHeight: '520px',
-                objectFit: 'cover',
-                objectPosition: 'center 10%',
-                border: 'none',
-                borderRadius: '0',
-                boxShadow: 'none'
-              }}
-            />
-
-            <span
-              className="about-visual-label"
-              style={{
-                position: 'absolute',
-                bottom: '18px',
-                left: '20px',
-                zIndex: 2,
-                padding: '8px 12px',
-                background: 'rgba(0, 0, 0, 0.55)',
-                borderRadius: '4px'
-              }}
-            >
-              Creativity × Technology
-            </span>
-          </motion.div>
-
-          <motion.div
-            className="about-content"
-            {...scrollReveal}
-          >
-            <p className="eyebrow">
-              THE PERSON BEHIND THE WORK
+              No projects in this category yet.
             </p>
-
-            <h2>
-              Hi, I'm <span>Durga Prasad.</span>
-            </h2>
-
-            <p>
-              I'm a freelance digital creator passionate about
-              bringing creative ideas to life through design,
-              technology, and visual storytelling.
-            </p>
-
-            <p>
-              Whether it's a modern website, a striking visual,
-              or an engaging video, my approach is simple:
-              create work that feels meaningful, thoughtful,
-              and memorable.
-            </p>
-
-            <p>
-              I believe great digital experiences come from
-              combining imagination, attention to detail,
-              and a willingness to keep learning.
-            </p>
-
-            <div className="about-signature">
-              Durga Prasad — Digital Creator
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CONTACT */}
-      <section className="contact-section" id="contact">
-        <motion.div
-          {...scrollReveal}
-          style={{
-            width: '100%',
-            maxWidth: '1120px',
-            margin: '0 auto',
-            textAlign: 'center'
-          }}
-        >
-          <p className="eyebrow">LET'S CONNECT</p>
-
-          <h2>
-            Let's Create <span>Something Great.</span>
-          </h2>
-
-          <p
-            style={{
-              maxWidth: '600px',
-              margin: '22px auto 0',
-              lineHeight: 1.8
-            }}
-          >
-            Have a creative idea, a project in mind, or simply
-            want to say hello? I'd love to hear from you.
-            Let's turn your vision into something memorable.
-          </p>
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: '20px',
-              marginTop: '52px',
-              width: '100%'
-            }}
-          >
-            {contactCards.map((contact, index) => (
-              <motion.a
-                key={contact.number}
-                href={contact.href}
-                target={
-                  contact.title === 'Email Me'
-                    ? undefined
-                    : '_blank'
-                }
-                rel={
-                  contact.title === 'Email Me'
-                    ? undefined
-                    : 'noopener noreferrer'
-                }
+          ) : (
+            visibleProjects.map((project, index) => (
+              <motion.article
+                key={project.id}
                 initial={{
                   opacity: reduceMotion ? 1 : 0,
-                  y: reduceMotion ? 0 : 35
+                  y: reduceMotion ? 0 : 55
                 }}
                 whileInView={{
                   opacity: 1,
                   y: 0
                 }}
-                viewport={{ once: true }}
+                viewport={{
+                  once: true,
+                  amount: 0.15
+                }}
                 whileHover={
-                  reduceMotion
-                    ? undefined
-                    : { y: -6 }
+                  reduceMotion ? undefined : { y: -7 }
                 }
                 transition={{
                   duration: reduceMotion ? 0 : 0.8,
-                  delay: reduceMotion ? 0 : index * 0.12
+                  delay: reduceMotion ? 0 : index * 0.15,
+                  ease: [0.22, 1, 0.36, 1]
                 }}
                 style={{
-                  flex: '1 1 260px',
-                  maxWidth: '460px',
                   minWidth: 0,
+                  padding: '16px',
                   boxSizing: 'border-box',
-                  padding: '32px 25px',
                   border:
-                    '1px solid rgba(214, 173, 96, 0.28)',
-                  borderRadius: '14px',
+                    '1px solid rgba(214, 173, 96, 0.3)',
+                  borderRadius: '18px',
                   background:
                     'linear-gradient(145deg, #1a1712, #100f0d)',
-                  textDecoration: 'none',
-                  textAlign: 'left',
+                  boxShadow:
+                    '0 20px 55px rgba(0, 0, 0, 0.25)',
+                  overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '15px',
-                  boxShadow:
-                    '0 16px 45px rgba(0, 0, 0, 0.2)'
+                  cursor: 'pointer'
                 }}
+                onClick={() => openPortfolioProject(project)}
+                onKeyDown={(event) => {
+                  if (
+                    event.key === 'Enter' ||
+                    event.key === ' '
+                  ) {
+                    event.preventDefault()
+                    openPortfolioProject(project)
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${project.title} project`}
               >
-                <span
+                <div
                   style={{
-                    color: '#c6a36a',
-                    fontSize: '12px',
-                    letterSpacing: '3px'
+                    width: '100%',
+                    height: '340px',
+                    background: '#0d0c0b',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                 >
-                  {contact.number} / CONNECT
-                </span>
+                  {project.media_type === 'video' ? (
+                    <video
+                      src={project.media_url}
+                      aria-label={
+                        project.alt_text || project.title
+                      }
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                      preload="metadata"
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={project.media_url}
+                      alt={project.alt_text || project.title}
+                      loading="lazy"
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  )}
+                </div>
 
-                <h3
+                <div
                   style={{
-                    color: '#f7f2e8',
-                    fontSize: '24px',
-                    margin: 0
+                    padding: '24px 8px 10px',
+                    textAlign: 'left',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flexGrow: 1
                   }}
                 >
-                  {contact.title}
-                </h3>
+                  <span
+                    style={{
+                      color: '#c6a36a',
+                      fontSize: '11px',
+                      letterSpacing: '2px',
+                      marginBottom: '12px'
+                    }}
+                  >
+                    PROJECT {project.number} / {project.category}
+                  </span>
 
-                <p
-                  style={{
-                    color: '#aaa49a',
-                    lineHeight: 1.7,
-                    margin: 0
-                  }}
-                >
-                  {contact.description}
-                </p>
+                  <h3
+                    style={{
+                      color: '#f7f2e8',
+                      fontSize: 'clamp(22px, 3vw, 28px)',
+                      margin: '0 0 12px'
+                    }}
+                  >
+                    {project.title}
+                  </h3>
 
-                <span
-                  style={{
-                    color: '#e9dfce',
-                    fontSize: '14px',
-                    overflowWrap: 'anywhere'
-                  }}
-                >
-                  {contact.value}
-                </span>
+                  <p
+                    style={{
+                      color: '#aaa49a',
+                      lineHeight: 1.8,
+                      margin: 0,
+                      fontSize: '14px'
+                    }}
+                  >
+                    {project.description || ''}
+                  </p>
 
-                <span
-                  style={{
-                    color: '#d8b778',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    marginTop: '10px'
-                  }}
-                >
-                  {contact.action}
-                </span>
-              </motion.a>
-            ))}
-          </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '9px',
+                      marginTop: 'auto',
+                      paddingTop: '22px'
+                    }}
+                  >
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          border:
+                            '1px solid rgba(214, 173, 96, 0.25)',
+                          borderRadius: '30px',
+                          padding: '7px 11px',
+                          color: '#d8b778',
+                          fontSize: '11px'
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
 
-          <StartProjectForm />
+                  <span
+                    style={{
+                      color: '#e4c78f',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      marginTop: '22px'
+                    }}
+                  >
+                    View Project ↗
+                  </span>
+                </div>
+              </motion.article>
+            ))
+          )}
+        </div>
 
-          <p
-            style={{
-              marginTop: '24px',
-              color: '#8e887e',
-              fontSize: '13px'
-            }}
-          >
-            Available for freelance collaborations.
-          </p>
-        </motion.div>
+        {!isAllWorksPage &&
+          !portfolioLoading &&
+          !portfolioError &&
+          projects.length > 4 && (
+            <div className="view-all-projects-wrap">
+              <a className="view-all-projects" href="/work">
+                View All Projects{' '}
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+          )}
       </section>
 
-      <footer>
-        <p>
-          © {new Date().getFullYear()} Durga Prasad.
-        </p>
-        <p>Designed with purpose. Built with passion.</p>
-      </footer>
+      {!isAllWorksPage && (
+        <>
+          <section className="services-section" id="services">
+            <motion.div
+              className="services-heading"
+              {...scrollReveal}
+            >
+              <p className="eyebrow">WHAT I CREATE</p>
 
-      {/* PREMIUM FULL-SCREEN PROJECT PREVIEW */}
+              <h2>
+                Creative <span>Services.</span>
+              </h2>
+
+              <p className="services-description">
+                From the first idea to the final experience,
+                I bring creativity and digital craftsmanship
+                together.
+              </p>
+            </motion.div>
+
+            <div className="services-grid">
+              {services.map((service, index) => (
+                <motion.article
+                  className="service-card"
+                  key={service.number}
+                  initial={{
+                    opacity: reduceMotion ? 1 : 0,
+                    y: reduceMotion ? 0 : 50
+                  }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0
+                  }}
+                  viewport={{
+                    once: true,
+                    amount: 0.2
+                  }}
+                  transition={{
+                    duration: reduceMotion ? 0 : 0.8,
+                    delay: reduceMotion ? 0 : index * 0.12,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                >
+                  <span className="service-number">
+                    {service.number} / 04
+                  </span>
+
+                  <h3>{service.title}</h3>
+                  <p>{service.description}</p>
+                </motion.article>
+              ))}
+            </div>
+          </section>
+
+          <section className="about-section" id="about">
+            <div className="about-container">
+              <motion.div
+                className="about-visual"
+                {...scrollReveal}
+                style={{
+                  padding: '0',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border:
+                    '1px solid rgba(214, 173, 96, 0.3)',
+                  borderRadius: '12px'
+                }}
+              >
+                <img
+                  src="/dp-portrait.png"
+                  alt="Durga Prasad — Freelance Digital Creator"
+                  className="about-portrait"
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: '100%',
+                    minHeight: '440px',
+                    maxHeight: '520px',
+                    objectFit: 'cover',
+                    objectPosition: 'center 10%',
+                    border: 'none',
+                    borderRadius: '0',
+                    boxShadow: 'none'
+                  }}
+                />
+
+                <span
+                  className="about-visual-label"
+                  style={{
+                    position: 'absolute',
+                    bottom: '18px',
+                    left: '20px',
+                    zIndex: 2,
+                    padding: '8px 12px',
+                    background: 'rgba(0, 0, 0, 0.55)',
+                    borderRadius: '4px'
+                  }}
+                >
+                  Creativity × Technology
+                </span>
+              </motion.div>
+
+              <motion.div
+                className="about-content"
+                {...scrollReveal}
+              >
+                <p className="eyebrow">
+                  THE PERSON BEHIND THE WORK
+                </p>
+
+                <h2>
+                  Hi, I'm <span>Durga Prasad.</span>
+                </h2>
+
+                <p>
+                  I'm a freelance digital creator passionate
+                  about bringing creative ideas to life through
+                  design, technology, and visual storytelling.
+                </p>
+
+                <p>
+                  Whether it's a modern website, a striking
+                  visual, or an engaging video, my approach is
+                  simple: create work that feels meaningful,
+                  thoughtful, and memorable.
+                </p>
+
+                <p>
+                  I believe great digital experiences come from
+                  combining imagination, attention to detail,
+                  and a willingness to keep learning.
+                </p>
+
+                <div className="about-signature">
+                  Durga Prasad — Digital Creator
+                </div>
+              </motion.div>
+            </div>
+          </section>
+
+          <section className="contact-section" id="contact">
+            <motion.div
+              {...scrollReveal}
+              style={{
+                width: '100%',
+                maxWidth: '1120px',
+                margin: '0 auto',
+                textAlign: 'center'
+              }}
+            >
+              <p className="eyebrow">LET'S CONNECT</p>
+
+              <h2>
+                Let's Create <span>Something Great.</span>
+              </h2>
+
+              <p
+                style={{
+                  maxWidth: '600px',
+                  margin: '22px auto 0',
+                  lineHeight: 1.8
+                }}
+              >
+                Have a creative idea, a project in mind, or
+                simply want to say hello? I'd love to hear from
+                you. Let's turn your vision into something
+                memorable.
+              </p>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  gap: '20px',
+                  marginTop: '52px',
+                  width: '100%'
+                }}
+              >
+                {contactCards.map((contact, index) => (
+                  <motion.a
+                    key={contact.number}
+                    href={contact.href}
+                    target={
+                      contact.title === 'Email Me'
+                        ? undefined
+                        : '_blank'
+                    }
+                    rel={
+                      contact.title === 'Email Me'
+                        ? undefined
+                        : 'noopener noreferrer'
+                    }
+                    initial={{
+                      opacity: reduceMotion ? 1 : 0,
+                      y: reduceMotion ? 0 : 35
+                    }}
+                    whileInView={{
+                      opacity: 1,
+                      y: 0
+                    }}
+                    viewport={{ once: true }}
+                    whileHover={
+                      reduceMotion ? undefined : { y: -6 }
+                    }
+                    transition={{
+                      duration: reduceMotion ? 0 : 0.8,
+                      delay: reduceMotion ? 0 : index * 0.12
+                    }}
+                    style={{
+                      flex: '1 1 260px',
+                      maxWidth: '460px',
+                      minWidth: 0,
+                      boxSizing: 'border-box',
+                      padding: '32px 25px',
+                      border:
+                        '1px solid rgba(214, 173, 96, 0.28)',
+                      borderRadius: '14px',
+                      background:
+                        'linear-gradient(145deg, #1a1712, #100f0d)',
+                      textDecoration: 'none',
+                      textAlign: 'left',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '15px',
+                      boxShadow:
+                        '0 16px 45px rgba(0, 0, 0, 0.2)'
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: '#c6a36a',
+                        fontSize: '12px',
+                        letterSpacing: '3px'
+                      }}
+                    >
+                      {contact.number} / CONNECT
+                    </span>
+
+                    <h3
+                      style={{
+                        color: '#f7f2e8',
+                        fontSize: '24px',
+                        margin: 0
+                      }}
+                    >
+                      {contact.title}
+                    </h3>
+
+                    <p
+                      style={{
+                        color: '#aaa49a',
+                        lineHeight: 1.7,
+                        margin: 0
+                      }}
+                    >
+                      {contact.description}
+                    </p>
+
+                    <span
+                      style={{
+                        color: '#e9dfce',
+                        fontSize: '14px',
+                        overflowWrap: 'anywhere'
+                      }}
+                    >
+                      {contact.value}
+                    </span>
+
+                    <span
+                      style={{
+                        color: '#d8b778',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        marginTop: '10px'
+                      }}
+                    >
+                      {contact.action}
+                    </span>
+                  </motion.a>
+                ))}
+              </div>
+
+              <StartProjectForm />
+
+              <p
+                style={{
+                  marginTop: '24px',
+                  color: '#8e887e',
+                  fontSize: '13px'
+                }}
+              >
+                Available for freelance collaborations.
+              </p>
+            </motion.div>
+          </section>
+
+          <footer>
+            <p>© {new Date().getFullYear()} Durga Prasad.</p>
+            <p>Designed with purpose. Built with passion.</p>
+          </footer>
+        </>
+      )}
+
       <AnimatePresence>
         {selectedProject && (
           <motion.div
@@ -1021,7 +1145,10 @@ function App() {
                 {selectedProject.media_type === 'video' ? (
                   <video
                     src={selectedProject.media_url}
-                    aria-label={selectedProject.alt_text || selectedProject.title}
+                    aria-label={
+                      selectedProject.alt_text ||
+                      selectedProject.title
+                    }
                     controls
                     autoPlay
                     playsInline
@@ -1038,7 +1165,10 @@ function App() {
                 ) : (
                   <img
                     src={selectedProject.media_url}
-                    alt={selectedProject.alt_text || selectedProject.title}
+                    alt={
+                      selectedProject.alt_text ||
+                      selectedProject.title
+                    }
                     style={{
                       display: 'block',
                       maxWidth: '100%',
