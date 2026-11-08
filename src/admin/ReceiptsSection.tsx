@@ -40,9 +40,9 @@ type Receipt = {
   created_at: string
 }
 
-const gold = '#D7B477'
-const panel = '#151310'
-const border = '#493A25'
+const accent = '#E50914'
+const panel = '#181818'
+const border = '#3A3A3A'
 
 function todayAsDateInput() {
   const today = new Date()
@@ -65,6 +65,7 @@ export default function ReceiptsSection() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [resendingId, setResendingId] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [paymentId, setPaymentId] = useState('')
@@ -241,6 +242,33 @@ export default function ReceiptsSection() {
     }
   }
 
+  const handleResendEmail = async (receipt: Receipt) => {
+    setError('')
+    setMessage('')
+    setResendingId(receipt.id)
+
+    try {
+      const { error: emailError } = await supabase.functions.invoke('send-receipt-email', {
+        body: { receipt_id: receipt.id },
+      })
+
+      if (emailError) throw emailError
+
+      const client = clients.find((item) => item.id === receipt.client_id)
+      setMessage(
+        'Receipt ' + receipt.receipt_number + ' emailed' +
+          (client?.email ? ' to ' + client.email : '') + '.',
+      )
+    } catch (emailError) {
+      setError(
+        emailError instanceof Error
+          ? emailError.message
+          : 'Unable to send the receipt email. Please try again.',
+      )
+    } finally {
+      setResendingId('')
+    }
+  }
   const handlePrint = (receipt: Receipt) => {
     setPreview(receipt)
 
@@ -290,15 +318,15 @@ export default function ReceiptsSection() {
     padding: '12px 13px',
     border: `1px solid ${border}`,
     borderRadius: 8,
-    background: '#0C0B0A',
-    color: '#F7F2E9',
+    background: '#141414',
+    color: '#F5F5F1',
     fontSize: 14,
-    outlineColor: gold,
+    outlineColor: accent,
   }
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
-    color: '#D8C9AE',
+    color: '#D7D7D2',
     fontSize: 13,
     marginBottom: 7,
   }
@@ -329,36 +357,36 @@ export default function ReceiptsSection() {
   return (
     <div>
       <style>{`
-        .dp-receipt-card { background:${panel}; border:1px solid #3B3021; border-radius:16px; padding:24px; }
+        .dp-receipt-card { background:${panel}; border:1px solid #3A3A3A; border-radius:16px; padding:24px; }
         .dp-receipt-actions { display:flex; flex-wrap:wrap; gap:8px; }
         .dp-receipt-table { width:100%; border-collapse:collapse; min-width:850px; font-size:13px; }
-        .dp-receipt-table th { color:${gold}; text-align:left; border-bottom:1px solid ${border}; padding:13px 10px; }
-        .dp-receipt-table td { color:#D8D0C4; border-bottom:1px solid #302719; padding:14px 10px; }
-        .dp-receipt-preview { max-width:760px; margin:24px auto; padding:42px; background:#fffdf8; color:#211b12; border:1px solid #d5c39f; border-radius:12px; box-shadow:0 18px 55px rgba(0,0,0,.25); }
-        .dp-receipt-gold { color:#9b7237; }
+        .dp-receipt-table th { color:${accent}; text-align:left; border-bottom:1px solid ${border}; padding:13px 10px; }
+        .dp-receipt-table td { color:#D7D7D2; border-bottom:1px solid #303030; padding:14px 10px; }
+        .dp-receipt-preview { max-width:760px; margin:24px auto; padding:42px; background:#181818; color:#F5F5F1; border:1px solid #E50914; border-radius:12px; box-shadow:0 18px 55px rgba(0,0,0,.25); }
+        .dp-receipt-accent { color:#E50914; }
         @media print {
           @page { size: A4 portrait; margin: 0; }
           html, body { width:100% !important; margin:0 !important; padding:0 !important; background:#fff !important; }
           body * { visibility:hidden !important; }
           #dp-receipt-print, #dp-receipt-print * { visibility:visible !important; }
-          #dp-receipt-print { display:block !important; position:fixed; left:0; top:0; width:100%; max-width:none; box-sizing:border-box; margin:0; padding:14mm; border:0; border-radius:0; box-shadow:none; background:#fffdf8 !important; color:#211b12 !important; }
+          #dp-receipt-print { display:block !important; position:fixed; left:0; top:0; width:100%; max-width:none; box-sizing:border-box; margin:0; padding:14mm; border:0; border-radius:0; box-shadow:none; background:#fff !important; color:#111111 !important; }
           #dp-receipt-print > div { width:100%; box-sizing:border-box; border-radius:0 !important; box-shadow:none !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
           .dp-receipt-no-print { display:none !important; }
         }
       `}</style>
 
       <section className="dp-receipt-card" style={{ marginBottom: 22 }}>
-        <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>
+        <h2 style={{ color: accent, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>
           Create a Receipt
         </h2>
-        <p style={{ color: '#AFA79C', fontSize: 13, lineHeight: 1.7 }}>
+        <p style={{ color: '#B3B3B3', fontSize: 13, lineHeight: 1.7 }}>
           Choose a paid payment. The client, amount, currency, and project details fill automatically.
         </p>
 
         {loading ? (
-          <p style={{ color: '#AFA79C' }}>Loading paid payments...</p>
+          <p style={{ color: '#B3B3B3' }}>Loading paid payments...</p>
         ) : availablePayments.length === 0 ? (
-          <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>
+          <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>
             No unreceipted paid payments are available. Add or mark a payment as Paid in Payments first.
           </p>
         ) : (
@@ -400,33 +428,33 @@ export default function ReceiptsSection() {
             </div>
 
             {selectedPayment && selectedClient && (
-              <div style={{ marginTop: 16, padding: 14, border: `1px solid ${border}`, borderRadius: 9, color: '#D8D0C4', fontSize: 13, lineHeight: 1.7 }}>
-                Receipt for <strong style={{ color: '#F5E4C7' }}>{selectedClient.client_name}</strong>
+              <div style={{ marginTop: 16, padding: 14, border: `1px solid ${border}`, borderRadius: 9, color: '#D7D7D2', fontSize: 13, lineHeight: 1.7 }}>
+                Receipt for <strong style={{ color: '#F5F5F1' }}>{selectedClient.client_name}</strong>
                 {selectedClient.email ? ` · ${selectedClient.email}` : ''}
                 {selectedProject ? ` · ${selectedProject.project_name}` : ''}
               </div>
             )}
 
-            <button type="submit" disabled={saving || !paymentId} style={{ marginTop: 18, padding: '12px 18px', border: '1px solid #9B7845', borderRadius: 8, background: gold, color: '#17110A', fontWeight: 700, cursor: saving ? 'wait' : 'pointer' }}>
+            <button type="submit" disabled={saving || !paymentId} style={{ marginTop: 18, padding: '12px 18px', border: '1px solid #E50914', borderRadius: 8, background: accent, color: '#FFFFFF', fontWeight: 700, cursor: saving ? 'wait' : 'pointer' }}>
               {saving ? 'CREATING RECEIPT...' : 'CREATE RECEIPT'}
             </button>
           </form>
         )}
       </section>
 
-      {error && <div role="alert" style={{ color: '#FFC3AE', background: '#281611', border: '1px solid #704536', borderRadius: 9, padding: 14, marginBottom: 18, overflowWrap: 'anywhere', fontSize: 13 }}>{error}</div>}
-      {message && <div role="status" style={{ color: '#D7B477', background: '#201910', border: `1px solid ${border}`, borderRadius: 9, padding: 14, marginBottom: 18, fontSize: 13 }}>{message}</div>}
+      {error && <div role="alert" style={{ color: '#FFC3C3', background: '#281111', border: '1px solid #7A2222', borderRadius: 9, padding: 14, marginBottom: 18, overflowWrap: 'anywhere', fontSize: 13 }}>{error}</div>}
+      {message && <div role="status" style={{ color: '#E50914', background: '#241416', border: `1px solid ${border}`, borderRadius: 9, padding: 14, marginBottom: 18, fontSize: 13 }}>{message}</div>}
 
       {preview && (
         <section className="dp-receipt-card dp-receipt-no-print" style={{ marginBottom: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 21, margin: 0 }}>Receipt Preview</h2>
+            <h2 style={{ color: accent, fontFamily: 'Georgia, serif', fontSize: 21, margin: 0 }}>Receipt Preview</h2>
             <div className="dp-receipt-actions">
-              <button type="button" onClick={() => handlePrint(preview)} style={{ padding: '9px 13px', border: '1px solid #9B7845', borderRadius: 8, background: gold, color: '#17110A', fontWeight: 700, cursor: 'pointer' }}>PRINT / SAVE PDF</button>
+              <button type="button" onClick={() => handlePrint(preview)} style={{ padding: '9px 13px', border: '1px solid #E50914', borderRadius: 8, background: accent, color: '#FFFFFF', fontWeight: 700, cursor: 'pointer' }}>PRINT / SAVE PDF</button>
               {getWhatsAppLink(preview) ? (
                 <a href={getWhatsAppLink(preview)} target="_blank" rel="noreferrer" style={{ display: 'inline-block', padding: '9px 13px', border: '1px solid #39734B', borderRadius: 8, background: '#14271B', color: '#B9E8C7', textDecoration: 'none', fontWeight: 700 }}>OPEN WHATSAPP</a>
               ) : (
-                <button type="button" disabled title="Add a phone number to the client record first" style={{ padding: '9px 13px', border: '1px solid #493A25', borderRadius: 8, background: '#201910', color: '#948B7F' }}>CLIENT PHONE NEEDED</button>
+                <button type="button" disabled title="Add a phone number to the client record first" style={{ padding: '9px 13px', border: '1px solid #3A3A3A', borderRadius: 8, background: '#241416', color: '#8B8B8B' }}>CLIENT PHONE NEEDED</button>
               )}
             </div>
           </div>
@@ -435,8 +463,8 @@ export default function ReceiptsSection() {
       )}
 
       <section className="dp-receipt-card">
-        <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>Receipts List ({receipts.length})</h2>
-        {loading ? <p style={{ color: '#AFA79C' }}>Loading receipts...</p> : receipts.length === 0 ? <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>No receipts have been created yet.</p> : (
+        <h2 style={{ color: accent, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>Receipts List ({receipts.length})</h2>
+        {loading ? <p style={{ color: '#B3B3B3' }}>Loading receipts...</p> : receipts.length === 0 ? <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>No receipts have been created yet.</p> : (
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <table className="dp-receipt-table">
               <thead><tr><th>Receipt</th><th>Client</th><th>Amount</th><th>Issued</th><th>Actions</th></tr></thead>
@@ -444,13 +472,14 @@ export default function ReceiptsSection() {
                 const client = clients.find((item) => item.id === receipt.client_id)
                 const whatsappLink = getWhatsAppLink(receipt)
                 return <tr key={receipt.id}>
-                  <td><strong style={{ color: '#F5E4C7' }}>{receipt.receipt_number}</strong><div style={{ color: '#948B7F', marginTop: 4 }}>{receipt.description || 'Payment receipt'}</div></td>
-                  <td>{client?.client_name || '—'}{client?.email && <div style={{ color: '#948B7F', marginTop: 4 }}>{client.email}</div>}</td>
+                  <td><strong style={{ color: '#F5F5F1' }}>{receipt.receipt_number}</strong><div style={{ color: '#8B8B8B', marginTop: 4 }}>{receipt.description || 'Payment receipt'}</div></td>
+                  <td>{client?.client_name || '—'}{client?.email && <div style={{ color: '#8B8B8B', marginTop: 4 }}>{client.email}</div>}</td>
                   <td>{money(Number(receipt.amount), receipt.currency)}</td>
                   <td>{new Date(`${receipt.issue_date}T00:00:00`).toLocaleDateString()}</td>
                   <td><div className="dp-receipt-actions">
-                    <button type="button" onClick={() => setPreview(receipt)} style={{ padding: '8px 10px', border: '1px solid #755B36', borderRadius: 7, background: '#201910', color: '#E4C78F', cursor: 'pointer' }}>View</button>
-                    <button type="button" onClick={() => handlePrint(receipt)} style={{ padding: '8px 10px', border: '1px solid #9B7845', borderRadius: 7, background: gold, color: '#17110A', fontWeight: 700, cursor: 'pointer' }}>Print / PDF</button>
+                    <button type="button" onClick={() => setPreview(receipt)} style={{ padding: '8px 10px', border: '1px solid #E50914', borderRadius: 7, background: '#241416', color: '#E50914', cursor: 'pointer' }}>View</button>
+                    <button type="button" onClick={() => void handleResendEmail(receipt)} disabled={Boolean(resendingId)} style={{ padding: '8px 10px', border: '1px solid #E50914', borderRadius: 7, background: '#241416', color: '#F5F5F1', cursor: resendingId ? 'wait' : 'pointer', opacity: resendingId && resendingId !== receipt.id ? 0.6 : 1 }}>{resendingId === receipt.id ? 'Sending...' : 'Resend Email'}</button>
+                    <button type="button" onClick={() => handlePrint(receipt)} style={{ padding: '8px 10px', border: '1px solid #E50914', borderRadius: 7, background: accent, color: '#FFFFFF', fontWeight: 700, cursor: 'pointer' }}>Print / PDF</button>
                     {whatsappLink && <a href={whatsappLink} target="_blank" rel="noreferrer" style={{ display: 'inline-block', padding: '8px 10px', border: '1px solid #39734B', borderRadius: 7, background: '#14271B', color: '#B9E8C7', textDecoration: 'none' }}>WhatsApp</a>}
                   </div></td>
                 </tr>
@@ -491,39 +520,39 @@ function ReceiptPaper({
   const isPaidInFull = balanceDue !== null && balanceDue <= 0
 
   return (
-    <div style={{ background: '#fffdf8', color: '#211b12', fontFamily: 'Arial, sans-serif', padding: 38, borderRadius: 10 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20, alignItems: 'flex-start', borderBottom: '2px solid #b98d4c', paddingBottom: 22 }}>
+    <div style={{ background: '#181818', color: '#F5F5F1', fontFamily: 'Arial, sans-serif', padding: 38, borderRadius: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20, alignItems: 'flex-start', borderBottom: '2px solid #B20710', paddingBottom: 22 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <img src="/dp-logo.png" alt="DP Creative Studio" style={{ width: 86, height: 72, objectFit: 'contain' }} />
           <div>
-            <div style={{ color: '#9b7237', fontSize: 11, letterSpacing: 2.5, fontWeight: 700 }}>DP CREATIVE STUDIO</div>
-            <div style={{ marginTop: 5, color: '#6f6250', fontSize: 12 }}>Creative services · Digital experiences</div>
+            <div style={{ color: '#E50914', fontSize: 11, letterSpacing: 2.5, fontWeight: 700 }}>DP CREATIVE STUDIO</div>
+            <div style={{ marginTop: 5, color: '#8B8B8B', fontSize: 12 }}>Creative services · Digital experiences</div>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ color: '#9b7237', fontFamily: 'Georgia, serif', fontSize: 25, fontWeight: 700 }}>PAYMENT RECEIPT</div>
-          <div style={{ marginTop: 8, color: '#665b4b', fontSize: 12 }}>Receipt No. <strong style={{ color: '#211b12' }}>{receipt.receipt_number}</strong></div>
-          <div style={{ marginTop: 4, color: '#665b4b', fontSize: 12 }}>Issued {new Date(`${receipt.issue_date}T00:00:00`).toLocaleDateString()}</div>
+          <div style={{ color: '#E50914', fontFamily: 'Georgia, serif', fontSize: 25, fontWeight: 700 }}>PAYMENT RECEIPT</div>
+          <div style={{ marginTop: 8, color: '#8B8B8B', fontSize: 12 }}>Receipt No. <strong style={{ color: '#F5F5F1' }}>{receipt.receipt_number}</strong></div>
+          <div style={{ marginTop: 4, color: '#8B8B8B', fontSize: 12 }}>Issued {new Date(`${receipt.issue_date}T00:00:00`).toLocaleDateString()}</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 28, padding: '26px 0' }}>
         <div>
-          <div style={{ color: '#9b7237', fontSize: 10, letterSpacing: 1.6, fontWeight: 700 }}>RECEIVED FROM</div>
+          <div style={{ color: '#E50914', fontSize: 10, letterSpacing: 1.6, fontWeight: 700 }}>RECEIVED FROM</div>
           <div style={{ marginTop: 8, fontSize: 17, fontWeight: 700 }}>{client?.client_name || 'Client'}</div>
-          {client?.email && <div style={{ marginTop: 4, color: '#6f6250', fontSize: 12 }}>{client.email}</div>}
-          {client?.phone && <div style={{ marginTop: 4, color: '#6f6250', fontSize: 12 }}>{client.phone}</div>}
+          {client?.email && <div style={{ marginTop: 4, color: '#8B8B8B', fontSize: 12 }}>{client.email}</div>}
+          {client?.phone && <div style={{ marginTop: 4, color: '#8B8B8B', fontSize: 12 }}>{client.phone}</div>}
         </div>
         <div style={{ minWidth: 180 }}>
-          <div style={{ color: '#9b7237', fontSize: 10, letterSpacing: 1.6, fontWeight: 700 }}>PAYMENT DETAILS</div>
+          <div style={{ color: '#E50914', fontSize: 10, letterSpacing: 1.6, fontWeight: 700 }}>PAYMENT DETAILS</div>
           {project && <div style={{ marginTop: 8, fontSize: 13 }}><strong>Project:</strong> {project.project_name}</div>}
           {payment?.payment_method && <div style={{ marginTop: 6, fontSize: 13 }}><strong>Method:</strong> {payment.payment_method}</div>}
           <div style={{ marginTop: 6, fontSize: 13 }}><strong>Status:</strong> Paid</div>
         </div>
       </div>
 
-      <div style={{ border: '1px solid #e1d5bf', borderRadius: 8, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '13px 16px', background: '#f5efe4', color: '#665b4b', fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
+      <div style={{ border: '1px solid #D7D7D2', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '13px 16px', background: '#F5F5F1', color: '#8B8B8B', fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
           <span>DESCRIPTION</span><span>PAID NOW</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '19px 16px', fontSize: 14 }}>
@@ -532,46 +561,48 @@ function ReceiptPaper({
         </div>
       </div>
 
-      <div style={{ marginTop: 18, border: '1px solid #e1d5bf', borderRadius: 8, overflow: 'hidden' }}>
+      <div style={{ marginTop: 18, border: '1px solid #D7D7D2', borderRadius: 8, overflow: 'hidden' }}>
         {projectBudget !== null ? (
           <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '13px 16px', borderBottom: '1px solid #e1d5bf', fontSize: 13 }}>
-              <span style={{ color: '#665b4b' }}>Project total</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '13px 16px', borderBottom: '1px solid #D7D7D2', fontSize: 13 }}>
+              <span style={{ color: '#8B8B8B' }}>Project total</span>
               <strong>{money(projectBudget, receipt.currency)}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '13px 16px', borderBottom: '1px solid #e1d5bf', fontSize: 13 }}>
-              <span style={{ color: '#665b4b' }}>Paid this payment</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '13px 16px', borderBottom: '1px solid #D7D7D2', fontSize: 13 }}>
+              <span style={{ color: '#8B8B8B' }}>Paid this payment</span>
               <strong>{money(Number(receipt.amount), receipt.currency)}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '13px 16px', borderBottom: '1px solid #e1d5bf', fontSize: 13 }}>
-              <span style={{ color: '#665b4b' }}>Total received to date</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '13px 16px', borderBottom: '1px solid #D7D7D2', fontSize: 13 }}>
+              <span style={{ color: '#8B8B8B' }}>Total received to date</span>
               <strong>{money(paidToDate, receipt.currency)}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '15px 16px', background: '#f5efe4', fontWeight: 700, fontSize: 15 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '15px 16px', background: '#F5F5F1', fontWeight: 700, fontSize: 15 }}>
               <span>{isPaidInFull ? 'Balance due' : 'Balance remaining'}</span>
-              <span style={{ color: isPaidInFull ? '#39734B' : '#9b7237' }}>
+              <span style={{ color: isPaidInFull ? '#39734B' : '#E50914' }}>
                 {balanceDue === null ? '—' : money(balanceDue, receipt.currency)}
               </span>
             </div>
           </>
         ) : (
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '15px 16px', background: '#f5efe4', fontWeight: 700, fontSize: 15 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 18, padding: '15px 16px', background: '#F5F5F1', fontWeight: 700, fontSize: 15 }}>
             <span>Paid this payment</span>
-            <span style={{ color: '#9b7237' }}>{money(Number(receipt.amount), receipt.currency)}</span>
+            <span style={{ color: '#E50914' }}>{money(Number(receipt.amount), receipt.currency)}</span>
           </div>
         )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 18, marginTop: 26, padding: 16, borderRadius: 8, background: '#f5efe4' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 18, marginTop: 26, padding: 16, borderRadius: 8, background: '#F5F5F1' }}>
         <div>
-          <div style={{ color: '#9b7237', fontSize: 10, letterSpacing: 1.5, fontWeight: 700 }}>PAYMENT RECEIVED</div>
-          <div style={{ marginTop: 5, color: '#665b4b', fontSize: 12 }}>Thank you for choosing DP Creative Studio.</div>
+          <div style={{ color: '#E50914', fontSize: 10, letterSpacing: 1.5, fontWeight: 700 }}>PAYMENT RECEIVED</div>
+          <div style={{ marginTop: 5, color: '#8B8B8B', fontSize: 12 }}>Thank you for choosing DP Creative Studio.</div>
         </div>
-        <div style={{ padding: '7px 13px', border: '1px solid #9b7237', borderRadius: 20, color: isPaidInFull ? '#39734B' : '#80602f', fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
+        <div style={{ padding: '7px 13px', border: '1px solid #E50914', borderRadius: 20, color: isPaidInFull ? '#39734B' : '#E50914', fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
           {projectBudget === null ? 'PAYMENT RECEIVED' : isPaidInFull ? 'PAID IN FULL' : 'PARTIAL PAYMENT'}
         </div>
       </div>
-      <div style={{ marginTop: 28, textAlign: 'center', color: '#8b806f', fontSize: 11 }}>Thank you for your trust. We appreciate your business.</div>
+      <div style={{ marginTop: 28, textAlign: 'center', color: '#8B8B8B', fontSize: 11 }}>Thank you for your trust. We appreciate your business.</div>
     </div>
   )
 }
+
+

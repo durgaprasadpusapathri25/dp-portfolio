@@ -23,7 +23,7 @@ type ClientMatch = {
   email: string | null
 }
 
-const gold = '#D7B477'
+const accent = '#E50914'
 
 export default function EnquiriesSection() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([])
@@ -207,8 +207,8 @@ export default function EnquiriesSection() {
   }
 
   const panelStyle: React.CSSProperties = {
-    background: '#151310',
-    border: '1px solid #3B3021',
+    background: '#181818',
+    border: '1px solid #3A3A3A',
     borderRadius: 16,
     padding: 22,
   }
@@ -221,11 +221,11 @@ export default function EnquiriesSection() {
   }
 
   const buttonStyle: React.CSSProperties = {
-    border: '1px solid #755B36',
+    border: '1px solid #E50914',
     borderRadius: 7,
     padding: '8px 10px',
-    background: '#201910',
-    color: '#E4C78F',
+    background: '#241416',
+    color: '#E50914',
     cursor: 'pointer',
     fontSize: 12,
     fontWeight: 600,
@@ -246,7 +246,7 @@ export default function EnquiriesSection() {
           <div>
             <h2
               style={{
-                color: gold,
+                color: accent,
                 fontFamily: 'Georgia, serif',
                 fontSize: 23,
                 margin: '0 0 8px',
@@ -257,7 +257,7 @@ export default function EnquiriesSection() {
 
             <p
               style={{
-                color: '#AFA79C',
+                color: '#B3B3B3',
                 fontSize: 13,
                 lineHeight: 1.7,
                 margin: 0,
@@ -282,9 +282,9 @@ export default function EnquiriesSection() {
         <div
           role="alert"
           style={{
-            color: '#FFC3AE',
-            background: '#281611',
-            border: '1px solid #704536',
+            color: '#FFC3C3',
+            background: '#281111',
+            border: '1px solid #7A2222',
             borderRadius: 9,
             padding: 14,
             marginBottom: 16,
@@ -300,9 +300,9 @@ export default function EnquiriesSection() {
         <div
           role="status"
           style={{
-            color: gold,
-            background: '#201910',
-            border: '1px solid #493A25',
+            color: accent,
+            background: '#241416',
+            border: '1px solid #3A3A3A',
             borderRadius: 9,
             padding: 14,
             marginBottom: 16,
@@ -316,7 +316,7 @@ export default function EnquiriesSection() {
       <section style={panelStyle}>
         <h2
           style={{
-            color: gold,
+            color: accent,
             fontFamily: 'Georgia, serif',
             fontSize: 22,
             marginTop: 0,
@@ -326,9 +326,9 @@ export default function EnquiriesSection() {
         </h2>
 
         {loading ? (
-          <p style={{ color: '#AFA79C' }}>Loading enquiries...</p>
+          <p style={{ color: '#B3B3B3' }}>Loading enquiries...</p>
         ) : enquiries.length === 0 ? (
-          <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>
+          <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>
             No enquiries yet. Requests submitted through the portfolio will
             appear here.
           </p>
@@ -350,10 +350,10 @@ export default function EnquiriesSection() {
                     <th
                       key={heading}
                       style={{
-                        color: gold,
+                        color: accent,
                         textAlign: 'left',
                         padding: '12px 10px',
-                        borderBottom: '1px solid #493A25',
+                        borderBottom: '1px solid #3A3A3A',
                         whiteSpace: 'nowrap',
                       }}
                     >
@@ -371,13 +371,13 @@ export default function EnquiriesSection() {
                     <tr key={enquiry.id}>
                       <td
                         style={{
-                          color: '#D8D0C4',
+                          color: '#D7D7D2',
                           padding: '14px 10px',
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           verticalAlign: 'top',
                         }}
                       >
-                        <strong style={{ color: '#F5E4C7' }}>
+                        <strong style={{ color: '#F5F5F1' }}>
                           {enquiry.client_name}
                         </strong>
                         <div style={{ marginTop: 5 }}>{enquiry.email}</div>
@@ -388,22 +388,22 @@ export default function EnquiriesSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
+                          color: '#D7D7D2',
                           padding: '14px 10px',
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           verticalAlign: 'top',
                           minWidth: 220,
                         }}
                       >
-                        <strong style={{ color: '#F5E4C7' }}>
+                        <strong style={{ color: '#F5F5F1' }}>
                           {enquiry.project_name}
                         </strong>
-                        <div style={{ color: gold, marginTop: 5 }}>
+                        <div style={{ color: accent, marginTop: 5 }}>
                           {enquiry.service}
                         </div>
                         <div
                           style={{
-                            color: '#AFA79C',
+                            color: '#B3B3B3',
                             marginTop: 7,
                             whiteSpace: 'pre-wrap',
                             lineHeight: 1.6,
@@ -415,9 +415,9 @@ export default function EnquiriesSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
+                          color: '#D7D7D2',
                           padding: '14px 10px',
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           verticalAlign: 'top',
                           whiteSpace: 'nowrap',
                         }}
@@ -429,9 +429,9 @@ export default function EnquiriesSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
+                          color: '#D7D7D2',
                           padding: '14px 10px',
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           verticalAlign: 'top',
                           whiteSpace: 'nowrap',
                         }}
@@ -441,9 +441,9 @@ export default function EnquiriesSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
+                          color: '#D7D7D2',
                           padding: '14px 10px',
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           verticalAlign: 'top',
                           whiteSpace: 'nowrap',
                         }}
@@ -454,7 +454,7 @@ export default function EnquiriesSection() {
                       <td
                         style={{
                           padding: '14px 10px',
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           verticalAlign: 'top',
                         }}
                       >
@@ -465,10 +465,10 @@ export default function EnquiriesSection() {
                               enquiry.status === 'Accepted'
                                 ? '#9FE0A8'
                                 : enquiry.status === 'Declined'
-                                  ? '#F0A69A'
-                                  : gold,
-                            background: '#201910',
-                            border: '1px solid #493A25',
+                                  ? '#FFC3C3'
+                                  : accent,
+                            background: '#241416',
+                            border: '1px solid #3A3A3A',
                             borderRadius: 20,
                             padding: '5px 9px',
                             fontSize: 12,
@@ -481,9 +481,9 @@ export default function EnquiriesSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
+                          color: '#D7D7D2',
                           padding: '14px 10px',
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           verticalAlign: 'top',
                           whiteSpace: 'nowrap',
                         }}
@@ -494,7 +494,7 @@ export default function EnquiriesSection() {
                       <td
                         style={{
                           padding: '14px 10px',
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           verticalAlign: 'top',
                           minWidth: 145,
                         }}
@@ -525,7 +525,7 @@ export default function EnquiriesSection() {
                               type="button"
                               style={{
                                 ...buttonStyle,
-                                color: '#D8D0C4',
+                                color: '#D7D7D2',
                               }}
                               disabled={busyEnquiryId !== null}
                               onClick={() =>
@@ -542,9 +542,9 @@ export default function EnquiriesSection() {
                               type="button"
                               style={{
                                 ...buttonStyle,
-                                color: '#F0C7A7',
-                                background: '#2A1712',
-                                borderColor: '#704536',
+                                color: '#FFC3C3',
+                                background: '#281111',
+                                borderColor: '#7A2222',
                               }}
                               disabled={busyEnquiryId !== null}
                               onClick={() =>
@@ -567,3 +567,4 @@ export default function EnquiriesSection() {
     </div>
   )
 }
+

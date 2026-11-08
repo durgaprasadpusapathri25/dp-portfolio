@@ -170,21 +170,21 @@ Deno.serve(async (request) => {
     const page = pdf.addPage([595, 842])
     const regular = await pdf.embedFont(StandardFonts.Helvetica)
     const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
-    const cream = rgb(0.99, 0.98, 0.95)
-    const gold = rgb(0.61, 0.43, 0.19)
-    const ink = rgb(0.13, 0.11, 0.08)
-    const muted = rgb(0.40, 0.36, 0.30)
+    const paper = rgb(1, 1, 1)
+    const accent = rgb(0.898, 0.035, 0.078)
+    const ink = rgb(0.07, 0.07, 0.07)
+    const muted = rgb(0.38, 0.38, 0.38)
     const safeClientName = safePdfText(client.client_name || "Client")
     const safeProject = safePdfText(project?.project_name || "")
     const safeDescription = safePdfText(receipt.description || "Payment received")
 
-    page.drawRectangle({ x: 0, y: 0, width: 595, height: 842, color: cream })
+    page.drawRectangle({ x: 0, y: 0, width: 595, height: 842, color: paper })
     page.drawRectangle({
       x: 38,
       y: 38,
       width: 519,
       height: 766,
-      borderColor: rgb(0.84, 0.77, 0.63),
+      borderColor: rgb(0.82, 0.82, 0.82),
       borderWidth: 1,
     })
 
@@ -203,21 +203,21 @@ Deno.serve(async (request) => {
       }
     }
 
-    page.drawText("DP CREATIVE STUDIO", { x: 150, y: 758, size: 14, font: bold, color: gold })
+    page.drawText("DP CREATIVE STUDIO", { x: 150, y: 758, size: 14, font: bold, color: accent })
     page.drawText("CREATIVE SERVICES  |  DIGITAL EXPERIENCES", { x: 150, y: 740, size: 8, font: regular, color: muted })
     page.drawText("PAYMENT RECEIPT", { x: 62, y: 672, size: 25, font: bold, color: ink })
     page.drawText(`Receipt No. ${safePdfText(receipt.receipt_number)}`, { x: 62, y: 642, size: 11, font: regular, color: muted })
     page.drawText(`Issue date: ${receiptDate}`, { x: 62, y: 624, size: 11, font: regular, color: muted })
-    page.drawLine({ start: { x: 62, y: 598 }, end: { x: 533, y: 598 }, thickness: 1.5, color: gold })
+    page.drawLine({ start: { x: 62, y: 598 }, end: { x: 533, y: 598 }, thickness: 1.5, color: accent })
 
-    page.drawText("RECEIVED FROM", { x: 62, y: 564, size: 9, font: bold, color: gold })
+    page.drawText("RECEIVED FROM", { x: 62, y: 564, size: 9, font: bold, color: accent })
     page.drawText(safeClientName.slice(0, 48), { x: 62, y: 540, size: 16, font: bold, color: ink })
     if (client.email) page.drawText(safePdfText(client.email).slice(0, 58), { x: 62, y: 520, size: 10, font: regular, color: muted })
     if (client.phone) page.drawText(safePdfText(client.phone).slice(0, 32), { x: 62, y: 504, size: 10, font: regular, color: muted })
     if (safeProject) page.drawText(`Project: ${safeProject.slice(0, 50)}`, { x: 62, y: 478, size: 11, font: regular, color: ink })
     if (payment?.payment_method) page.drawText(`Method: ${safePdfText(payment.payment_method).slice(0, 36)}`, { x: 62, y: 458, size: 11, font: regular, color: ink })
 
-    page.drawRectangle({ x: 62, y: 360, width: 471, height: 70, color: rgb(0.96, 0.94, 0.89) })
+    page.drawRectangle({ x: 62, y: 360, width: 471, height: 70, color: rgb(0.96, 0.96, 0.96) })
     page.drawText("DESCRIPTION", { x: 78, y: 405, size: 9, font: bold, color: muted })
     page.drawText("AMOUNT", { x: 420, y: 405, size: 9, font: bold, color: muted })
     page.drawText(safeDescription.slice(0, 48), { x: 78, y: 380, size: 11, font: regular, color: ink })
@@ -237,7 +237,7 @@ Deno.serve(async (request) => {
         y: summaryY,
         size: emphasis ? 12 : 10,
         font: emphasis ? bold : regular,
-        color: emphasis ? gold : ink,
+        color: emphasis ? accent : ink,
       })
       summaryY -= 23
     }
@@ -252,14 +252,14 @@ Deno.serve(async (request) => {
     }
 
     const statusY = 188
-    page.drawRectangle({ x: 62, y: statusY, width: 471, height: 52, color: rgb(0.96, 0.94, 0.89) })
+    page.drawRectangle({ x: 62, y: statusY, width: 471, height: 52, color: rgb(0.96, 0.96, 0.96) })
     page.drawText(
       projectTotal === null
         ? "PAYMENT RECEIVED"
         : isPaidInFull
         ? "PROJECT PAID IN FULL"
         : "PARTIAL PAYMENT RECEIVED",
-      { x: 78, y: statusY + 30, size: 10, font: bold, color: gold },
+      { x: 78, y: statusY + 30, size: 10, font: bold, color: accent },
     )
     page.drawText("Thank you for choosing DP Creative Studio.", { x: 78, y: statusY + 12, size: 10, font: regular, color: muted })
     page.drawText("Thank you for your trust. We appreciate your business.", { x: 116, y: 136, size: 10, font: regular, color: muted })
@@ -268,22 +268,22 @@ Deno.serve(async (request) => {
     const safeName = escapeHtml(client.client_name || "Client")
     const safeNumber = escapeHtml(receipt.receipt_number)
     const safeProjectHtml = project?.project_name
-      ? `<tr><td style="padding:12px 0;color:#766b5b;border-bottom:1px solid #e9dfcd">Project</td><td style="padding:12px 0;text-align:right;color:#211b12;border-bottom:1px solid #e9dfcd">${escapeHtml(project.project_name)}</td></tr>`
+      ? `<tr><td style="padding:12px 0;color:#B3B3B3;border-bottom:1px solid #303030">Project</td><td style="padding:12px 0;text-align:right;color:#F5F5F1;border-bottom:1px solid #303030">${escapeHtml(project.project_name)}</td></tr>`
       : ""
     const safeMethodHtml = payment?.payment_method
-      ? `<tr><td style="padding:12px 0;color:#766b5b;border-bottom:1px solid #e9dfcd">Payment method</td><td style="padding:12px 0;text-align:right;color:#211b12;border-bottom:1px solid #e9dfcd">${escapeHtml(payment.payment_method)}</td></tr>`
+      ? `<tr><td style="padding:12px 0;color:#B3B3B3;border-bottom:1px solid #303030">Payment method</td><td style="padding:12px 0;text-align:right;color:#F5F5F1;border-bottom:1px solid #303030">${escapeHtml(payment.payment_method)}</td></tr>`
       : ""
     const logoHtml = `<img src="${LOGO_URL}" alt="DP Creative Studio" width="76" style="display:block;width:76px;height:auto;max-height:58px;object-fit:contain;margin:0 auto 12px">`
     const breakdownHtml = projectTotal !== null
-      ? `<tr><td style="padding:12px 0;color:#766b5b;border-bottom:1px solid #e9dfcd">Project total</td><td style="padding:12px 0;text-align:right;border-bottom:1px solid #e9dfcd">${escapeHtml(formatMoney(projectTotal, currency))}</td></tr><tr><td style="padding:12px 0;color:#766b5b;border-bottom:1px solid #e9dfcd">Paid this payment</td><td style="padding:12px 0;text-align:right;border-bottom:1px solid #e9dfcd">${escapeHtml(formattedAmount)}</td></tr><tr><td style="padding:12px 0;color:#211b12;font-weight:bold;border-bottom:1px solid #e9dfcd">Total received to date</td><td style="padding:12px 0;text-align:right;color:#211b12;font-weight:bold;border-bottom:1px solid #e9dfcd">${escapeHtml(formatMoney(receivedToDate, currency))}</td></tr><tr><td style="padding:12px 0;color:#211b12;font-weight:bold;border-top:1px solid #d7b477">Balance remaining</td><td style="padding:12px 0;text-align:right;color:#9b7237;font-size:17px;font-weight:bold;border-top:1px solid #d7b477">${escapeHtml(formatMoney(balanceDue ?? 0, currency))}</td></tr>`
-      : `<tr><td style="padding:16px 0;color:#211b12;font-weight:bold;border-top:1px solid #d7b477">Total paid</td><td style="padding:16px 0;text-align:right;color:#9b7237;font-size:18px;font-weight:bold;border-top:1px solid #d7b477">${escapeHtml(formattedAmount)}</td></tr>`
+      ? `<tr><td style="padding:12px 0;color:#B3B3B3;border-bottom:1px solid #303030">Project total</td><td style="padding:12px 0;text-align:right;border-bottom:1px solid #303030">${escapeHtml(formatMoney(projectTotal, currency))}</td></tr><tr><td style="padding:12px 0;color:#B3B3B3;border-bottom:1px solid #303030">Paid this payment</td><td style="padding:12px 0;text-align:right;border-bottom:1px solid #303030">${escapeHtml(formattedAmount)}</td></tr><tr><td style="padding:12px 0;color:#F5F5F1;font-weight:bold;border-bottom:1px solid #303030">Total received to date</td><td style="padding:12px 0;text-align:right;color:#F5F5F1;font-weight:bold;border-bottom:1px solid #303030">${escapeHtml(formatMoney(receivedToDate, currency))}</td></tr><tr><td style="padding:12px 0;color:#F5F5F1;font-weight:bold;border-top:1px solid #E50914">Balance remaining</td><td style="padding:12px 0;text-align:right;color:#E50914;font-size:17px;font-weight:bold;border-top:1px solid #E50914">${escapeHtml(formatMoney(balanceDue ?? 0, currency))}</td></tr>`
+      : `<tr><td style="padding:16px 0;color:#F5F5F1;font-weight:bold;border-top:1px solid #E50914">Total paid</td><td style="padding:16px 0;text-align:right;color:#E50914;font-size:18px;font-weight:bold;border-top:1px solid #E50914">${escapeHtml(formattedAmount)}</td></tr>`
     const statusLabel = projectTotal === null
       ? "PAYMENT RECEIVED"
       : isPaidInFull
       ? "PROJECT PAID IN FULL"
       : "PARTIAL PAYMENT RECEIVED"
 
-    const html = `<!doctype html><html><body style="margin:0;background:#f2eee6;font-family:Arial,sans-serif;color:#211b12"><div style="max-width:620px;margin:30px auto;background:#fffdf8;border:1px solid #ddcfb5;border-radius:14px;overflow:hidden"><div style="padding:26px 32px;background:#151310;color:#fffdf8;text-align:center">${logoHtml}<div style="color:#d7b477;font-size:12px;letter-spacing:3px;font-weight:bold">DP CREATIVE STUDIO</div><h1 style="margin:16px 0 6px;font-family:Georgia,serif;font-size:26px">Payment receipt</h1><div style="color:#d8c9ae;font-size:13px">Receipt ${safeNumber}</div></div><div style="padding:28px 32px"><p style="font-size:15px">Hi ${safeName},</p><p style="color:#766b5b;line-height:1.7">Thank you for your payment. Your receipt is attached to this email.</p><table style="width:100%;border-collapse:collapse;margin:22px 0"><tr><td style="padding:12px 0;color:#766b5b;border-bottom:1px solid #e9dfcd">Issue date</td><td style="padding:12px 0;text-align:right;border-bottom:1px solid #e9dfcd">${escapeHtml(receiptDate)}</td></tr>${safeProjectHtml}${safeMethodHtml}${breakdownHtml}</table><div style="display:inline-block;padding:10px 14px;border:1px solid #d7b477;border-radius:20px;color:#805b25;font-size:11px;font-weight:bold;letter-spacing:1px">${statusLabel}</div><p style="color:#766b5b;font-size:13px;line-height:1.7;margin-top:24px">We appreciate your business and look forward to working with you.</p><div style="margin-top:26px;color:#9b7237;font-size:11px;letter-spacing:1px">DP CREATIVE STUDIO</div></div></div></body></html>`
+    const html = `<!doctype html><html><body style="margin:0;background:#111111;font-family:Arial,sans-serif;color:#F5F5F1"><div style="max-width:620px;margin:30px auto;background:#181818;border:1px solid #3A3A3A;border-radius:14px;overflow:hidden"><div style="padding:26px 32px;background:#E50914;color:#181818;text-align:center">${logoHtml}<div style="color:#E50914;font-size:12px;letter-spacing:3px;font-weight:bold">DP CREATIVE STUDIO</div><h1 style="margin:16px 0 6px;font-family:Georgia,serif;font-size:26px">Payment receipt</h1><div style="color:#FFFFFF;font-size:13px">Receipt ${safeNumber}</div></div><div style="padding:28px 32px"><p style="font-size:15px">Hi ${safeName},</p><p style="color:#B3B3B3;line-height:1.7">Thank you for your payment. Your receipt is attached to this email.</p><table style="width:100%;border-collapse:collapse;margin:22px 0"><tr><td style="padding:12px 0;color:#B3B3B3;border-bottom:1px solid #303030">Issue date</td><td style="padding:12px 0;text-align:right;border-bottom:1px solid #303030">${escapeHtml(receiptDate)}</td></tr>${safeProjectHtml}${safeMethodHtml}${breakdownHtml}</table><div style="display:inline-block;padding:10px 14px;border:1px solid #E50914;border-radius:20px;color:#FFFFFF;font-size:11px;font-weight:bold;letter-spacing:1px">${statusLabel}</div><p style="color:#B3B3B3;font-size:13px;line-height:1.7;margin-top:24px">We appreciate your business and look forward to working with you.</p><div style="margin-top:26px;color:#E50914;font-size:11px;letter-spacing:1px">DP CREATIVE STUDIO</div></div></div></body></html>`
 
     const transporter = nodemailer.createTransport({
       host: smtpHost,
@@ -315,3 +315,4 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: error instanceof Error ? error.message : "Unexpected email error." }, 500)
   }
 })
+
