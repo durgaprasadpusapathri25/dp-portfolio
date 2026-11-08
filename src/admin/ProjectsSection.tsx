@@ -20,7 +20,7 @@ type Project = {
   created_at: string
 }
 
-const gold = '#D7B477'
+const accent = '#E50914'
 
 const projectStatuses: ProjectStatus[] = [
   'Planning',
@@ -244,36 +244,36 @@ export default function ProjectsSection() {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     boxSizing: 'border-box',
-    background: '#0C0B0A',
-    color: '#F7F2E9',
-    border: '1px solid #493A25',
+    background: '#141414',
+    color: '#F5F5F1',
+    border: '1px solid #3A3A3A',
     borderRadius: 8,
     padding: '12px 13px',
-    outlineColor: gold,
+    outlineColor: accent,
     fontSize: 14,
   }
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
-    color: '#D8C9AE',
+    color: '#D7D7D2',
     fontSize: 13,
     marginBottom: 7,
   }
 
   const cardStyle: React.CSSProperties = {
-    background: '#151310',
-    border: '1px solid #3B3021',
+    background: '#181818',
+    border: '1px solid #3A3A3A',
     borderRadius: 16,
     padding: 24,
     minWidth: 0,
   }
 
   const actionButtonStyle: React.CSSProperties = {
-    border: '1px solid #80643A',
+    border: '1px solid #E50914',
     borderRadius: 7,
     padding: '8px 11px',
-    background: '#17130E',
-    color: gold,
+    background: '#181818',
+    color: accent,
     fontSize: 12,
     fontWeight: 600,
     cursor: 'pointer',
@@ -287,7 +287,7 @@ export default function ProjectsSection() {
       >
         <h2
           style={{
-            color: gold,
+            color: accent,
             fontFamily: 'Georgia, serif',
             fontSize: 23,
             marginTop: 0,
@@ -296,7 +296,7 @@ export default function ProjectsSection() {
           {editingId ? 'Edit Project' : 'Add New Project'}
         </h2>
 
-        <p style={{ color: '#AFA79C', fontSize: 13, lineHeight: 1.7 }}>
+        <p style={{ color: '#B3B3B3', fontSize: 13, lineHeight: 1.7 }}>
           {editingId
             ? 'Update this project’s details below.'
             : 'Add project details and optionally link the project to a client.'}
@@ -446,11 +446,11 @@ export default function ProjectsSection() {
               type="submit"
               disabled={saving || loading}
               style={{
-                border: '1px solid #9B7845',
+                border: '1px solid #E50914',
                 borderRadius: 8,
                 padding: '12px 18px',
-                background: '#D7B477',
-                color: '#17110A',
+                background: '#E50914',
+                color: '#FFFFFF',
                 fontWeight: 700,
                 cursor: saving || loading ? 'wait' : 'pointer',
                 opacity: saving || loading ? 0.6 : 1,
@@ -485,9 +485,9 @@ export default function ProjectsSection() {
         <div
           role="alert"
           style={{
-            color: '#FFC3AE',
-            background: '#281611',
-            border: '1px solid #704536',
+            color: '#FFC3C3',
+            background: '#281111',
+            border: '1px solid #7A2222',
             borderRadius: 9,
             padding: 14,
             marginBottom: 18,
@@ -503,9 +503,9 @@ export default function ProjectsSection() {
         <div
           role="status"
           style={{
-            color: '#D7B477',
-            background: '#201910',
-            border: '1px solid #493A25',
+            color: '#E50914',
+            background: '#241416',
+            border: '1px solid #3A3A3A',
             borderRadius: 9,
             padding: 14,
             marginBottom: 18,
@@ -519,7 +519,7 @@ export default function ProjectsSection() {
       <section style={cardStyle}>
         <h2
           style={{
-            color: gold,
+            color: accent,
             fontFamily: 'Georgia, serif',
             fontSize: 23,
             marginTop: 0,
@@ -529,9 +529,9 @@ export default function ProjectsSection() {
         </h2>
 
         {loading ? (
-          <p style={{ color: '#AFA79C' }}>Loading projects...</p>
+          <p style={{ color: '#B3B3B3' }}>Loading projects...</p>
         ) : projects.length === 0 ? (
-          <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>
+          <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>
             No projects have been added yet.
           </p>
         ) : (
@@ -558,10 +558,10 @@ export default function ProjectsSection() {
                     <th
                       key={heading}
                       style={{
-                        color: gold,
+                        color: accent,
                         textAlign: 'left',
                         fontWeight: 600,
-                        borderBottom: '1px solid #493A25',
+                        borderBottom: '1px solid #3A3A3A',
                         padding: '13px 10px',
                       }}
                     >
@@ -585,18 +585,18 @@ export default function ProjectsSection() {
                     <tr key={project.id}>
                       <td
                         style={{
-                          color: '#D8D0C4',
-                          borderBottom: '1px solid #302719',
+                          color: '#D7D7D2',
+                          borderBottom: '1px solid #303030',
                           padding: '14px 10px',
                         }}
                       >
-                        <strong style={{ color: '#F5E4C7' }}>
+                        <strong style={{ color: '#F5F5F1' }}>
                           {project.project_name}
                         </strong>
                         {project.description && (
                           <div
                             style={{
-                              color: '#948B7F',
+                              color: '#8B8B8B',
                               marginTop: 5,
                               maxWidth: 260,
                             }}
@@ -608,8 +608,8 @@ export default function ProjectsSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
-                          borderBottom: '1px solid #302719',
+                          color: '#D7D7D2',
+                          borderBottom: '1px solid #303030',
                           padding: '14px 10px',
                         }}
                       >
@@ -618,8 +618,8 @@ export default function ProjectsSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
-                          borderBottom: '1px solid #302719',
+                          color: '#D7D7D2',
+                          borderBottom: '1px solid #303030',
                           padding: '14px 10px',
                         }}
                       >
@@ -628,8 +628,8 @@ export default function ProjectsSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
-                          borderBottom: '1px solid #302719',
+                          color: '#D7D7D2',
+                          borderBottom: '1px solid #303030',
                           padding: '14px 10px',
                         }}
                       >
@@ -640,8 +640,8 @@ export default function ProjectsSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
-                          borderBottom: '1px solid #302719',
+                          color: '#D7D7D2',
+                          borderBottom: '1px solid #303030',
                           padding: '14px 10px',
                         }}
                       >
@@ -650,8 +650,8 @@ export default function ProjectsSection() {
 
                       <td
                         style={{
-                          color: '#D8D0C4',
-                          borderBottom: '1px solid #302719',
+                          color: '#D7D7D2',
+                          borderBottom: '1px solid #303030',
                           padding: '14px 10px',
                         }}
                       >
@@ -660,7 +660,7 @@ export default function ProjectsSection() {
 
                       <td
                         style={{
-                          borderBottom: '1px solid #302719',
+                          borderBottom: '1px solid #303030',
                           padding: '14px 10px',
                         }}
                       >
@@ -683,8 +683,8 @@ export default function ProjectsSection() {
                             disabled={rowBusy}
                             style={{
                               ...actionButtonStyle,
-                              borderColor: '#704536',
-                              color: '#FFC3AE',
+                              borderColor: '#7A2222',
+                              color: '#FFC3C3',
                               opacity: rowBusy ? 0.55 : 1,
                             }}
                           >
@@ -703,3 +703,4 @@ export default function ProjectsSection() {
     </div>
   )
 }
+

@@ -62,6 +62,7 @@ type Payment = {
   notes: string | null
   created_at: string
 }
+
 const sections: DashboardSection[] = [
   'Overview',
   'Enquiries',
@@ -80,7 +81,7 @@ const projectStatuses: ProjectStatus[] = [
   'On Hold',
 ]
 
-const gold = '#D7B477'
+const accent = '#E50914'
 
 type StudioSettings = {
   studio_name: string
@@ -89,6 +90,10 @@ type StudioSettings = {
   whatsapp: string
   address: string
   tagline: string
+  about_intro: string
+  about_paragraph_2: string
+  about_paragraph_3: string
+  resume_url: string
 }
 
 const defaultStudioSettings: StudioSettings = {
@@ -98,10 +103,19 @@ const defaultStudioSettings: StudioSettings = {
   whatsapp: '',
   address: '',
   tagline: 'Creative services · Digital experiences',
+  about_intro:
+    "I'm a freelance digital creator passionate about bringing creative ideas to life through design, technology, and visual storytelling.",
+  about_paragraph_2:
+    "Whether it's a modern website, a striking visual, or an engaging video, my approach is to create work that feels meaningful, thoughtful, and memorable.",
+  about_paragraph_3:
+    'I believe great digital experiences come from combining imagination, attention to detail, and a willingness to keep learning.',
+  resume_url: '',
 }
 
 function SettingsSection() {
-  const [settings, setSettings] = useState<StudioSettings>(defaultStudioSettings)
+  const [settings, setSettings] =
+    useState<StudioSettings>(defaultStudioSettings)
+  const [selectedResume, setSelectedResume] = useState<File | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -116,7 +130,9 @@ function SettingsSection() {
 
       const { data, error: loadError } = await supabase
         .from('studio_settings')
-        .select('studio_name, email, phone, whatsapp, address, tagline')
+        .select(
+          'studio_name, email, phone, whatsapp, address, tagline, about_intro, about_paragraph_2, about_paragraph_3, resume_url',
+        )
         .eq('id', true)
         .maybeSingle()
 
@@ -126,28 +142,45 @@ function SettingsSection() {
         setError(loadError.message)
       } else if (data) {
         setSettings({
-          studio_name: data.studio_name ?? defaultStudioSettings.studio_name,
+          studio_name:
+            data.studio_name ?? defaultStudioSettings.studio_name,
           email: data.email ?? '',
           phone: data.phone ?? '',
           whatsapp: data.whatsapp ?? '',
           address: data.address ?? '',
-          tagline: data.tagline ?? '',
+          tagline: data.tagline ?? defaultStudioSettings.tagline,
+          about_intro:
+            data.about_intro ?? defaultStudioSettings.about_intro,
+          about_paragraph_2:
+            data.about_paragraph_2 ??
+            defaultStudioSettings.about_paragraph_2,
+          about_paragraph_3:
+            data.about_paragraph_3 ??
+            defaultStudioSettings.about_paragraph_3,
+          resume_url: data.resume_url ?? '',
         })
       }
+
       setLoading(false)
     }
 
     void loadSettings()
+
     return () => {
       cancelled = true
     }
   }, [])
 
-  const updateField = (field: keyof StudioSettings, value: string) => {
+  const updateField = (
+    field: keyof StudioSettings,
+    value: string,
+  ) => {
     setSettings((current) => ({ ...current, [field]: value }))
   }
 
-  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault()
     if (saving) return
 
@@ -159,8 +192,41 @@ function SettingsSection() {
       return
     }
 
+    if (selectedResume) {
+      if (selectedResume.type !== 'application/pdf') {
+        setError('Please choose a PDF resume.')
+        return
+      }
+
+      if (selectedResume.size > 50 * 1024 * 1024) {
+        setError('The resume must be 50 MB or smaller.')
+        return
+      }
+    }
+
     setSaving(true)
+
     try {
+      let resumeUrl = settings.resume_url.trim()
+
+      if (selectedResume) {
+        const safeFileName = selectedResume.name.replace(/[^a-zA-Z0-9._-]/g, '-')
+const resumePath = `resume/${crypto.randomUUID()}-${safeFileName}`
+
+        const { error: uploadError } = await supabase.storage
+          .from('portfolio-images')
+          .upload(resumePath, selectedResume, {
+            upsert: true,
+            contentType: 'application/pdf',
+          })
+
+        if (uploadError) throw uploadError
+
+        resumeUrl = supabase.storage
+          .from('portfolio-images')
+          .getPublicUrl(resumePath).data.publicUrl
+      }
+
       const { error: saveError } = await supabase
         .from('studio_settings')
         .upsert(
@@ -172,19 +238,31 @@ function SettingsSection() {
             whatsapp: settings.whatsapp.trim() || null,
             address: settings.address.trim() || null,
             tagline: settings.tagline.trim() || null,
+            about_intro: settings.about_intro.trim() || null,
+            about_paragraph_2:
+              settings.about_paragraph_2.trim() || null,
+            about_paragraph_3:
+              settings.about_paragraph_3.trim() || null,
+            resume_url: resumeUrl || null,
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'id' },
         )
 
       if (saveError) throw saveError
-      setSettings((current) => ({ ...current, studio_name: current.studio_name.trim() }))
-      setMessage('Studio settings saved successfully.')
+
+      setSettings((current) => ({
+        ...current,
+        studio_name: current.studio_name.trim(),
+        resume_url: resumeUrl,
+      }))
+      setSelectedResume(null)
+      setMessage('Profile and resume saved successfully.')
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : 'Unable to save studio settings.',
+          : 'Unable to save profile and resume.',
       )
     } finally {
       setSaving(false)
@@ -194,61 +272,128 @@ function SettingsSection() {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     boxSizing: 'border-box',
-    background: '#0C0B0A',
-    color: '#F7F2E9',
-    border: '1px solid #493A25',
-    borderRadius: 8,
+    background: '#111111',
+    color: '#F5F5F1',
+    border: '1px solid #454545',
+    borderRadius: 7,
     padding: '12px 13px',
-    outlineColor: gold,
+    outlineColor: '#E50914',
     fontSize: 14,
   }
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
-    color: '#D8C9AE',
+    color: '#D7D7D2',
     fontSize: 13,
     marginBottom: 7,
   }
 
   const fields: Array<{
-    key: keyof StudioSettings
+    key: 'studio_name' | 'email' | 'phone' | 'whatsapp' | 'tagline'
     label: string
     type?: string
     placeholder: string
   }> = [
-    { key: 'studio_name', label: 'Studio Name *', placeholder: 'DP Creative Studio' },
-    { key: 'email', label: 'Business Email', type: 'email', placeholder: 'you@example.com' },
-    { key: 'phone', label: 'Phone Number', type: 'tel', placeholder: 'Business phone number' },
-    { key: 'whatsapp', label: 'WhatsApp Number', type: 'tel', placeholder: 'Include country code, e.g. 919876543210' },
-    { key: 'tagline', label: 'Tagline', placeholder: 'Creative services · Digital experiences' },
+    {
+      key: 'studio_name',
+      label: 'Studio Name *',
+      placeholder: 'DP Creative Studio',
+    },
+    {
+      key: 'email',
+      label: 'Business Email',
+      type: 'email',
+      placeholder: 'you@example.com',
+    },
+    {
+      key: 'phone',
+      label: 'Phone Number',
+      type: 'tel',
+      placeholder: 'Business phone number',
+    },
+    {
+      key: 'whatsapp',
+      label: 'WhatsApp Number',
+      type: 'tel',
+      placeholder: 'Include country code, e.g. 919876543210',
+    },
+    {
+      key: 'tagline',
+      label: 'Tagline',
+      placeholder: 'Creative services · Digital experiences',
+    },
   ]
 
   return (
     <div>
       <section className="dp-admin-card" style={{ marginBottom: 22 }}>
-        <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>
-          Studio Profile
+        <h2
+          style={{
+            color: '#E50914',
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 23,
+            marginTop: 0,
+          }}
+        >
+          Profile & Resume
         </h2>
-        <p style={{ color: '#AFA79C', fontSize: 13, lineHeight: 1.7 }}>
-          Manage the contact and brand details for your studio. These settings are saved securely in Supabase.
+
+        <p style={{ color: '#B3B3B3', fontSize: 13, lineHeight: 1.7 }}>
+          Update your profile details and resume. These details will appear on
+          your public portfolio.
         </p>
 
         {error && (
-          <div role="alert" style={{ color: '#FFC3AE', background: '#281611', border: '1px solid #704536', borderRadius: 9, padding: 14, marginBottom: 18, overflowWrap: 'anywhere', fontSize: 13 }}>
+          <div
+            role="alert"
+            style={{
+              color: '#FFC3C3',
+              background: '#281111',
+              border: '1px solid #7A2222',
+              borderRadius: 8,
+              padding: 14,
+              marginBottom: 18,
+              overflowWrap: 'anywhere',
+              fontSize: 13,
+            }}
+          >
             {error}
           </div>
         )}
+
         {message && (
-          <div role="status" style={{ color: '#D7B477', background: '#201910', border: '1px solid #493A25', borderRadius: 9, padding: 14, marginBottom: 18, fontSize: 13 }}>
+          <div
+            role="status"
+            style={{
+              color: '#F5F5F1',
+              background: '#202020',
+              border: '1px solid #454545',
+              borderRadius: 8,
+              padding: 14,
+              marginBottom: 18,
+              fontSize: 13,
+            }}
+          >
             {message}
           </div>
         )}
 
         <form onSubmit={handleSave}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: 16, marginTop: 22 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns:
+                'repeat(auto-fit,minmax(min(100%,240px),1fr))',
+              gap: 16,
+              marginTop: 22,
+            }}
+          >
             {fields.map((field) => (
               <div key={field.key}>
-                <label style={labelStyle} htmlFor={`studio-${field.key}`}>
+                <label
+                  style={labelStyle}
+                  htmlFor={`studio-${field.key}`}
+                >
                   {field.label}
                 </label>
                 <input
@@ -256,9 +401,10 @@ function SettingsSection() {
                   type={field.type ?? 'text'}
                   style={inputStyle}
                   value={settings[field.key]}
-                  onChange={(event) => updateField(field.key, event.target.value)}
+                  onChange={(event) =>
+                    updateField(field.key, event.target.value)
+                  }
                   placeholder={field.placeholder}
-                  maxLength={field.key === 'studio_name' ? 150 : 254}
                   required={field.key === 'studio_name'}
                   disabled={loading || saving}
                 />
@@ -266,31 +412,152 @@ function SettingsSection() {
             ))}
 
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle} htmlFor="studio-address">Business Address</label>
+              <label style={labelStyle} htmlFor="studio-address">
+                Business Address
+              </label>
               <textarea
                 id="studio-address"
-                style={{ ...inputStyle, minHeight: 90, resize: 'vertical' }}
+                style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
                 value={settings.address}
-                onChange={(event) => updateField('address', event.target.value)}
+                onChange={(event) =>
+                  updateField('address', event.target.value)
+                }
                 placeholder="Studio or business address (optional)"
                 maxLength={500}
                 disabled={loading || saving}
               />
             </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={labelStyle} htmlFor="about-intro">
+                About You — Introduction
+              </label>
+              <textarea
+                id="about-intro"
+                style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
+                value={settings.about_intro}
+                onChange={(event) =>
+                  updateField('about_intro', event.target.value)
+                }
+                placeholder="Introduce yourself and describe what you do."
+                maxLength={1500}
+                disabled={loading || saving}
+              />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={labelStyle} htmlFor="about-paragraph-2">
+                About You — Paragraph 2
+              </label>
+              <textarea
+                id="about-paragraph-2"
+                style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
+                value={settings.about_paragraph_2}
+                onChange={(event) =>
+                  updateField('about_paragraph_2', event.target.value)
+                }
+                placeholder="Describe the kind of work you do."
+                maxLength={1500}
+                disabled={loading || saving}
+              />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={labelStyle} htmlFor="about-paragraph-3">
+                About You — Paragraph 3
+              </label>
+              <textarea
+                id="about-paragraph-3"
+                style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
+                value={settings.about_paragraph_3}
+                onChange={(event) =>
+                  updateField('about_paragraph_3', event.target.value)
+                }
+                placeholder="Add anything else you want visitors to know."
+                maxLength={1500}
+                disabled={loading || saving}
+              />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={labelStyle} htmlFor="resume-file">
+                Resume PDF
+              </label>
+              <input
+                id="resume-file"
+                type="file"
+                accept="application/pdf,.pdf"
+                style={inputStyle}
+                onChange={(event) =>
+                  setSelectedResume(event.target.files?.[0] ?? null)
+                }
+                disabled={loading || saving}
+              />
+
+              {selectedResume && (
+                <p style={{ color: '#B3B3B3', fontSize: 12 }}>
+                  Selected: {selectedResume.name}
+                </p>
+              )}
+
+              {settings.resume_url && (
+                <a
+                  href={settings.resume_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: 'inline-block',
+                    marginTop: 10,
+                    color: '#F5F5F1',
+                  }}
+                >
+                  Open current resume ↗
+                </a>
+              )}
+            </div>
           </div>
 
-          <button className="dp-admin-primary" type="submit" disabled={loading || saving} style={{ marginTop: 20 }}>
-            {loading ? 'LOADING SETTINGS...' : saving ? 'SAVING SETTINGS...' : 'SAVE SETTINGS'}
+          <button
+            className="dp-admin-primary"
+            type="submit"
+            disabled={loading || saving}
+            style={{
+              marginTop: 20,
+              background: '#E50914',
+              borderColor: '#E50914',
+              color: '#FFFFFF',
+            }}
+          >
+            {loading
+              ? 'LOADING...'
+              : saving
+                ? 'SAVING...'
+                : 'SAVE PROFILE & RESUME'}
           </button>
         </form>
       </section>
 
       <section className="dp-admin-card">
-        <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 20, marginTop: 0 }}>
+        <h2
+          style={{
+            color: '#E50914',
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 20,
+            marginTop: 0,
+          }}
+        >
           Email Configuration
         </h2>
-        <p style={{ color: '#AFA79C', lineHeight: 1.8, fontSize: 13, marginBottom: 0 }}>
-          Receipt email delivery is configured securely through Supabase Edge Function secrets. SMTP credentials are not shown or edited on this page.
+        <p
+          style={{
+            color: '#B3B3B3',
+            lineHeight: 1.8,
+            fontSize: 13,
+            marginBottom: 0,
+          }}
+        >
+          Receipt email delivery is configured securely through Supabase Edge
+          Function secrets. SMTP credentials are not shown or edited here.
         </p>
       </section>
     </div>
@@ -298,7 +565,7 @@ function SettingsSection() {
 }
 
 export default function AdminDashboard() {
-  const [activeSection, setActiveSection] =
+    const [activeSection, setActiveSection] =
     useState<DashboardSection>('Overview')
   const [menuOpen, setMenuOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
@@ -523,6 +790,7 @@ export default function AdminDashboard() {
       cancelled = true
     }
   }, [activeSection])
+
   // Load clients when the Clients section is opened.
   useEffect(() => {
     if (activeSection !== 'Clients') return
@@ -685,6 +953,7 @@ export default function AdminDashboard() {
     void loadPayments()
     return () => { cancelled = true }
   }, [activeSection])
+
   const handleLogout = async () => {
     if (loggingOut || clientBusy || projectBusy || paymentBusy) return
 
@@ -798,8 +1067,7 @@ export default function AdminDashboard() {
     )
 
     if (!confirmed) return
-
-    setDeletingClientId(client.id)
+        setDeletingClientId(client.id)
     setClientError('')
     setClientMessage('')
 
@@ -1125,6 +1393,7 @@ export default function AdminDashboard() {
       setDeletingPaymentId(null)
     }
   }
+
   const revenueValue = Object.entries(overviewStats.revenue)
     .filter(([, amount]) => amount > 0)
     .map(([currency, amount]) =>
@@ -1142,21 +1411,22 @@ export default function AdminDashboard() {
     { title: 'Active Projects', value: overviewLoading ? '…' : String(overviewStats.activeProjects), icon: '◈' },
     { title: 'Total Revenue (Paid)', value: overviewLoading ? '…' : revenueValue, icon: '₹' },
   ]
+
   const inputStyle: React.CSSProperties = {
     width: '100%',
     boxSizing: 'border-box',
-    background: '#0C0B0A',
-    color: '#F7F2E9',
-    border: '1px solid #493A25',
+    background: '#141414',
+    color: '#F5F5F1',
+    border: '1px solid #3A3A3A',
     borderRadius: 8,
     padding: '12px 13px',
-    outlineColor: gold,
+    outlineColor: accent,
     fontSize: 14,
   }
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
-    color: '#D8C9AE',
+    color: '#D7D7D2',
     fontSize: 13,
     marginBottom: 7,
   }
@@ -1166,58 +1436,58 @@ export default function AdminDashboard() {
       style={{
         minHeight: '100vh',
         background: '#080808',
-        color: '#F7F2E9',
+        color: '#F5F5F1',
         fontFamily: 'Inter, Arial, sans-serif',
       }}
     >
       <style>{`
         .dp-admin-layout { display:flex; min-height:100vh; }
         .dp-admin-sidebar {
-          width:255px; flex-shrink:0; background:#11100E;
-          border-right:1px solid #302719; padding:25px 18px;
+          width:255px; flex-shrink:0; background:#111111;
+          border-right:1px solid #303030; padding:25px 18px;
         }
         .dp-admin-main { flex:1; min-width:0; padding:35px; }
         .dp-admin-brand {
           display:flex; flex-direction:column; align-items:center;
           justify-content:center; margin-bottom:28px; padding-bottom:20px;
-          border-bottom:1px solid #302719;
+          border-bottom:1px solid #303030;
         }
         .dp-admin-logo {
           width:125px; height:100px; object-fit:contain; display:block;
         }
         .dp-admin-brand-name {
-          font-size:9px; letter-spacing:2.5px; color:#B9A47E;
+          font-size:9px; letter-spacing:2.5px; color:#B3B3B3;
           margin-top:2px; text-align:center;
         }
         .dp-admin-nav {
           width:100%; display:flex; align-items:center; padding:14px 16px;
-          margin-bottom:6px; background:transparent; color:#B6B0A5;
+          margin-bottom:6px; background:transparent; color:#B3B3B3;
           border:1px solid transparent; border-radius:10px; cursor:pointer;
           text-align:left; font-size:14px; transition:background .2s,color .2s;
         }
         .dp-admin-nav.active {
-          background:#2A2116; color:#D7B477; border-color:#554126;
+          background:#241416; color:#E50914; border-color:#3A3A3A;
         }
-        .dp-admin-nav:hover { color:#D7B477; }
+        .dp-admin-nav:hover { color:#E50914; }
         .dp-admin-nav:disabled { opacity:.6; cursor:wait; }
         .dp-admin-cards {
           display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px;
         }
         .dp-admin-card {
-          background:#151310; border:1px solid #3B3021;
+          background:#181818; border:1px solid #3A3A3A;
           border-radius:16px; padding:24px; min-width:0;
         }
         .dp-admin-menu-button { display:none; }
         .dp-admin-logout {
-          border:1px solid #755B36; border-radius:9px; padding:11px 18px;
-          background:#201910; color:#E4C78F; cursor:pointer; font-size:12px;
+          border:1px solid #E50914; border-radius:9px; padding:11px 18px;
+          background:#241416; color:#E50914; cursor:pointer; font-size:12px;
           font-weight:600; letter-spacing:1px; transition:background .2s;
         }
-        .dp-admin-logout:hover { background:#352717; }
+        .dp-admin-logout:hover { background:#301014; }
         .dp-admin-logout:disabled { opacity:.6; cursor:wait; }
         .dp-admin-primary {
-          border:1px solid #9B7845; border-radius:8px; padding:12px 18px;
-          background:#D7B477; color:#17110A; font-weight:700; cursor:pointer;
+          border:1px solid #E50914; border-radius:8px; padding:12px 18px;
+          background:#E50914; color:#FFFFFF; font-weight:700; cursor:pointer;
         }
         .dp-admin-primary:disabled { opacity:.6; cursor:wait; }
         .dp-admin-table-wrap { width:100%; overflow-x:auto; }
@@ -1225,15 +1495,15 @@ export default function AdminDashboard() {
           width:100%; border-collapse:collapse; min-width:560px; font-size:13px;
         }
         .dp-admin-table th {
-          color:#D7B477; text-align:left; font-weight:600;
-          border-bottom:1px solid #493A25; padding:13px 10px;
+          color:#E50914; text-align:left; font-weight:600;
+          border-bottom:1px solid #3A3A3A; padding:13px 10px;
         }
         .dp-admin-table td {
-          color:#D8D0C4; border-bottom:1px solid #302719;
+          color:#D7D7D2; border-bottom:1px solid #303030;
           padding:14px 10px; overflow-wrap:anywhere;
         }
         .dp-admin-delete {
-          color:#F0C7A7; background:#2A1712; border:1px solid #704536;
+          color:#FFC3C3; background:#281111; border:1px solid #7A2222;
           border-radius:7px; padding:8px 10px; cursor:pointer;
         }
         .dp-admin-delete:disabled { opacity:.6; cursor:wait; }
@@ -1277,8 +1547,8 @@ export default function AdminDashboard() {
                 top: 10,
                 right: 0,
                 background: 'transparent',
-                color: gold,
-                border: `1px solid ${gold}`,
+                color: accent,
+                border: `1px solid ${accent}`,
                 borderRadius: 8,
                 padding: '8px 12px',
                 cursor: 'pointer',
@@ -1319,8 +1589,8 @@ export default function AdminDashboard() {
             style={{
               marginTop: 35,
               padding: 16,
-              borderTop: '1px solid #302719',
-              color: '#8E877D',
+              borderTop: '1px solid #303030',
+              color: '#8B8B8B',
               fontSize: 11,
               lineHeight: 1.8,
             }}
@@ -1344,7 +1614,7 @@ export default function AdminDashboard() {
             <div>
               <div
                 style={{
-                  color: gold,
+                  color: accent,
                   fontSize: 11,
                   letterSpacing: 3,
                   marginBottom: 10,
@@ -1361,7 +1631,7 @@ export default function AdminDashboard() {
                 }}
               >
                 {activeSection}
-                <span style={{ color: gold }}>.</span>
+                <span style={{ color: accent }}>.</span>
               </h1>
             </div>
 
@@ -1375,10 +1645,10 @@ export default function AdminDashboard() {
             >
               <div
                 style={{
-                  border: '1px solid #493A25',
+                  border: '1px solid #3A3A3A',
                   borderRadius: 30,
                   padding: '12px 18px',
-                  color: gold,
+                  color: accent,
                   fontSize: 12,
                 }}
               >
@@ -1397,8 +1667,8 @@ export default function AdminDashboard() {
           </header>
 
           {logoutError && (
-            <p role="alert" style={{ color: '#E4C78F', fontSize: 13 }}>
-              {logoutError}
+            <p role="alert" style={{ color: '#E50914', fontSize: 13 }}>
+                            {logoutError}
             </p>
           )}
 
@@ -1406,7 +1676,7 @@ export default function AdminDashboard() {
             <>
               <p
                 style={{
-                  color: '#AFA79C',
+                  color: '#B3B3B3',
                   marginBottom: 30,
                   lineHeight: 1.7,
                 }}
@@ -1418,13 +1688,13 @@ export default function AdminDashboard() {
               <div className="dp-admin-cards">
                 {cards.map((card) => (
                   <div className="dp-admin-card" key={card.title}>
-                    <div style={{ color: gold, fontSize: 26, marginBottom: 22 }}>
+                    <div style={{ color: accent, fontSize: 26, marginBottom: 22 }}>
                       {card.icon}
                     </div>
 
                     <div
                       style={{
-                        color: '#B7AFA3',
+                        color: '#B3B3B3',
                         fontSize: 13,
                         marginBottom: 12,
                       }}
@@ -1434,7 +1704,7 @@ export default function AdminDashboard() {
 
                     <div
                       style={{
-                        color: '#F5E4C7',
+                        color: '#F5F5F1',
                         fontSize: 30,
                         fontWeight: 600,
                       }}
@@ -1446,27 +1716,27 @@ export default function AdminDashboard() {
               </div>
 
               {overviewError && (
-                <div role="alert" style={{ color: '#FFC3AE', background: '#281611', border: '1px solid #704536', borderRadius: 9, padding: 14, marginTop: 20, overflowWrap: 'anywhere', fontSize: 13 }}>
+                <div role="alert" style={{ color: '#FFC3C3', background: '#281611', border: '1px solid #7A2222', borderRadius: 9, padding: 14, marginTop: 20, overflowWrap: 'anywhere', fontSize: 13 }}>
                   Could not load Overview data: {overviewError}
                 </div>
               )}
 
               <div className="dp-admin-card" style={{ marginTop: 25 }}>
-                <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 21 }}>
+                <h2 style={{ color: accent, fontFamily: 'Georgia, serif', fontSize: 21 }}>
                   Recent Activity
                 </h2>
                 {overviewLoading ? (
-                  <p style={{ color: '#AFA79C', fontSize: 14 }}>Loading recent activity...</p>
+                  <p style={{ color: '#B3B3B3', fontSize: 14 }}>Loading recent activity...</p>
                 ) : recentActivity.length === 0 ? (
-                  <p style={{ color: '#AFA79C', fontSize: 14, lineHeight: 1.8 }}>
+                  <p style={{ color: '#B3B3B3', fontSize: 14, lineHeight: 1.8 }}>
                     No recent activity yet. New enquiries, clients, and projects will appear here.
                   </p>
                 ) : (
                   <div style={{ display: 'grid', gap: 12 }}>
                     {recentActivity.map((item) => (
-                      <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8, paddingBottom: 12, borderBottom: '1px solid #302719' }}>
-                        <span style={{ color: '#D8D0C4', fontSize: 14 }}>{item.message}</span>
-                        <time dateTime={item.created_at} style={{ color: '#948B7F', fontSize: 12 }}>
+                      <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8, paddingBottom: 12, borderBottom: '1px solid #303030' }}>
+                        <span style={{ color: '#D7D7D2', fontSize: 14 }}>{item.message}</span>
+                        <time dateTime={item.created_at} style={{ color: '#8B8B8B', fontSize: 12 }}>
                           {new Date(item.created_at).toLocaleString()}
                         </time>
                       </div>
@@ -1481,7 +1751,7 @@ export default function AdminDashboard() {
               <section className="dp-admin-card" style={{ marginBottom: 22 }}>
                 <h2
                   style={{
-                    color: gold,
+                    color: accent,
                     fontFamily: 'Georgia, serif',
                     fontSize: 23,
                     marginTop: 0,
@@ -1490,7 +1760,7 @@ export default function AdminDashboard() {
                   {editingClientId ? 'Edit Client' : 'Add New Client'}
                 </h2>
 
-                <p style={{ color: '#AFA79C', fontSize: 13, lineHeight: 1.7 }}>
+                <p style={{ color: '#B3B3B3', fontSize: 13, lineHeight: 1.7 }}>
                   {editingClientId
                     ? 'Update the client details below, then save your changes.'
                     : 'Client details will be securely saved to the database. Only the client name is required.'}
@@ -1632,9 +1902,9 @@ export default function AdminDashboard() {
                 <div
                   role="alert"
                   style={{
-                    color: '#FFC3AE',
+                    color: '#FFC3C3',
                     background: '#281611',
-                    border: '1px solid #704536',
+                    border: '1px solid #7A2222',
                     borderRadius: 9,
                     padding: 14,
                     marginBottom: 18,
@@ -1650,9 +1920,9 @@ export default function AdminDashboard() {
                 <div
                   role="status"
                   style={{
-                    color: '#D7B477',
-                    background: '#201910',
-                    border: '1px solid #493A25',
+                    color: '#E50914',
+                    background: '#241416',
+                    border: '1px solid #3A3A3A',
                     borderRadius: 9,
                     padding: 14,
                     marginBottom: 18,
@@ -1666,7 +1936,7 @@ export default function AdminDashboard() {
               <section className="dp-admin-card">
                 <h2
                   style={{
-                    color: gold,
+                    color: accent,
                     fontFamily: 'Georgia, serif',
                     fontSize: 23,
                     marginTop: 0,
@@ -1676,13 +1946,13 @@ export default function AdminDashboard() {
                 </h2>
 
                 {clientsLoading ? (
-                  <p style={{ color: '#AFA79C' }}>Loading clients...</p>
+                  <p style={{ color: '#B3B3B3' }}>Loading clients...</p>
                 ) : clientError && clients.length === 0 ? (
-                  <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>
+                  <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>
                     Unable to load the clients list. Please check the error above.
                   </p>
                 ) : clients.length === 0 ? (
-                  <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>
+                  <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>
                     No clients have been added yet. Use the form above to add
                     your first client.
                   </p>
@@ -1703,14 +1973,14 @@ export default function AdminDashboard() {
                         {clients.map((client) => (
                           <tr key={client.id}>
                             <td>
-                              <strong style={{ color: '#F5E4C7' }}>
+                              <strong style={{ color: '#F5F5F1' }}>
                                 {client.client_name}
                               </strong>
 
                               {client.notes && (
                                 <div
                                   style={{
-                                    color: '#948B7F',
+                                    color: '#8B8B8B',
                                     marginTop: 5,
                                     maxWidth: 230,
                                   }}
@@ -1785,7 +2055,7 @@ export default function AdminDashboard() {
               <section className="dp-admin-card" style={{ marginBottom: 22 }}>
                 <h2
                   style={{
-                    color: gold,
+                    color: accent,
                     fontFamily: 'Georgia, serif',
                     fontSize: 23,
                     marginTop: 0,
@@ -1794,7 +2064,7 @@ export default function AdminDashboard() {
                   {editingProjectId ? 'Edit Project' : 'Add New Project'}
                 </h2>
 
-                <p style={{ color: '#AFA79C', fontSize: 13, lineHeight: 1.7 }}>
+                <p style={{ color: '#B3B3B3', fontSize: 13, lineHeight: 1.7 }}>
                   {editingProjectId
                     ? 'Update the project details, then save your changes.'
                     : 'Add project details and optionally link the project to a client.'}
@@ -1985,9 +2255,9 @@ export default function AdminDashboard() {
                 <div
                   role="alert"
                   style={{
-                    color: '#FFC3AE',
+                    color: '#FFC3C3',
                     background: '#281611',
-                    border: '1px solid #704536',
+                    border: '1px solid #7A2222',
                     borderRadius: 9,
                     padding: 14,
                     marginBottom: 18,
@@ -2003,9 +2273,9 @@ export default function AdminDashboard() {
                 <div
                   role="status"
                   style={{
-                    color: '#D7B477',
-                    background: '#201910',
-                    border: '1px solid #493A25',
+                    color: '#E50914',
+                    background: '#241416',
+                    border: '1px solid #3A3A3A',
                     borderRadius: 9,
                     padding: 14,
                     marginBottom: 18,
@@ -2019,7 +2289,7 @@ export default function AdminDashboard() {
               <section className="dp-admin-card">
                 <h2
                   style={{
-                    color: gold,
+                    color: accent,
                     fontFamily: 'Georgia, serif',
                     fontSize: 23,
                     marginTop: 0,
@@ -2029,13 +2299,13 @@ export default function AdminDashboard() {
                 </h2>
 
                 {projectsLoading ? (
-                  <p style={{ color: '#AFA79C' }}>Loading projects...</p>
+                  <p style={{ color: '#B3B3B3' }}>Loading projects...</p>
                 ) : projectError && projects.length === 0 ? (
-                  <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>
+                  <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>
                     Unable to load projects. Please check the error above.
                   </p>
                 ) : projects.length === 0 ? (
-                  <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>
+                  <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>
                     No projects have been added yet.
                   </p>
                 ) : (
@@ -2065,14 +2335,14 @@ export default function AdminDashboard() {
                           return (
                             <tr key={project.id}>
                               <td>
-                                <strong style={{ color: '#F5E4C7' }}>
+                                <strong style={{ color: '#F5F5F1' }}>
                                   {project.project_name}
                                 </strong>
 
                                 {project.description && (
                                   <div
                                     style={{
-                                      color: '#948B7F',
+                                      color: '#8B8B8B',
                                       marginTop: 5,
                                       maxWidth: 260,
                                     }}
@@ -2143,10 +2413,10 @@ export default function AdminDashboard() {
           ) : activeSection === 'Payments' ? (
             <>
               <section className="dp-admin-card" style={{ marginBottom: 22 }}>
-                <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>
+                <h2 style={{ color: accent, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>
                   {editingPaymentId ? 'Edit Payment' : 'Add Payment'}
                 </h2>
-                <p style={{ color: '#AFA79C', fontSize: 13, lineHeight: 1.7 }}>
+                <p style={{ color: '#B3B3B3', fontSize: 13, lineHeight: 1.7 }}>
                   Record payments received or expected from clients. Only amount is required.
                 </p>
                 <form onSubmit={handleSavePayment}>
@@ -2211,12 +2481,12 @@ export default function AdminDashboard() {
                 </form>
               </section>
 
-              {paymentError && <div role="alert" style={{ color: '#FFC3AE', background: '#281611', border: '1px solid #704536', borderRadius: 9, padding: 14, marginBottom: 18, overflowWrap: 'anywhere', fontSize: 13 }}>{paymentError}</div>}
-              {paymentMessage && <div role="status" style={{ color: '#D7B477', background: '#201910', border: '1px solid #493A25', borderRadius: 9, padding: 14, marginBottom: 18, fontSize: 13 }}>{paymentMessage}</div>}
+              {paymentError && <div role="alert" style={{ color: '#FFC3C3', background: '#281611', border: '1px solid #7A2222', borderRadius: 9, padding: 14, marginBottom: 18, overflowWrap: 'anywhere', fontSize: 13 }}>{paymentError}</div>}
+              {paymentMessage && <div role="status" style={{ color: '#E50914', background: '#241416', border: '1px solid #3A3A3A', borderRadius: 9, padding: 14, marginBottom: 18, fontSize: 13 }}>{paymentMessage}</div>}
 
               <section className="dp-admin-card">
-                <h2 style={{ color: gold, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>Payments List ({payments.length})</h2>
-                {paymentsLoading ? <p style={{ color: '#AFA79C' }}>Loading payments...</p> : paymentError && payments.length === 0 ? <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>Unable to load payments. Please check the error above.</p> : payments.length === 0 ? <p style={{ color: '#AFA79C', lineHeight: 1.7 }}>No payments have been recorded yet.</p> : (
+                <h2 style={{ color: accent, fontFamily: 'Georgia, serif', fontSize: 23, marginTop: 0 }}>Payments List ({payments.length})</h2>
+                {paymentsLoading ? <p style={{ color: '#B3B3B3' }}>Loading payments...</p> : paymentError && payments.length === 0 ? <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>Unable to load payments. Please check the error above.</p> : payments.length === 0 ? <p style={{ color: '#B3B3B3', lineHeight: 1.7 }}>No payments have been recorded yet.</p> : (
                   <div className="dp-admin-table-wrap">
                     <table className="dp-admin-table" style={{ minWidth: 900 }}>
                       <thead><tr><th>Client / Project</th><th>Amount</th><th>Method</th><th>Status</th><th>Payment Date</th><th>Notes</th><th>Actions</th></tr></thead>
@@ -2224,10 +2494,10 @@ export default function AdminDashboard() {
                         const client = clients.find((item) => item.id === payment.client_id)
                         const project = projects.find((item) => item.id === payment.project_id)
                         return <tr key={payment.id}>
-                          <td><strong style={{ color: '#F5E4C7' }}>{client?.client_name || '—'}</strong>{project && <div style={{ color: '#948B7F', marginTop: 5 }}>{project.project_name}</div>}</td>
+                          <td><strong style={{ color: '#F5F5F1' }}>{client?.client_name || '—'}</strong>{project && <div style={{ color: '#8B8B8B', marginTop: 5 }}>{project.project_name}</div>}</td>
                           <td>{new Intl.NumberFormat('en-IN', { style: 'currency', currency: payment.currency, maximumFractionDigits: 2 }).format(Number(payment.amount))}</td>
                           <td>{payment.payment_method || '—'}</td>
-                          <td><span style={{ color: payment.payment_status === 'Paid' ? '#9BD7A7' : payment.payment_status === 'Failed' ? '#FFC3AE' : '#E4C78F' }}>{payment.payment_status}</span></td>
+                          <td><span style={{ color: payment.payment_status === 'Paid' ? '#9BD7A7' : payment.payment_status === 'Failed' ? '#FFC3C3' : '#E50914' }}>{payment.payment_status}</span></td>
                           <td>{payment.payment_date ? new Date(`${payment.payment_date}T00:00:00`).toLocaleDateString() : '—'}</td>
                           <td>{payment.notes || '—'}</td>
                           <td><div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -2247,7 +2517,7 @@ export default function AdminDashboard() {
             <div className="dp-admin-card">
               <h2
                 style={{
-                  color: gold,
+                  color: accent,
                   fontFamily: 'Georgia, serif',
                   fontSize: 23,
                 }}
@@ -2257,7 +2527,7 @@ export default function AdminDashboard() {
 
               <p
                 style={{
-                  color: '#AFA79C',
+                  color: '#B3B3B3',
                   lineHeight: 1.8,
                   fontSize: 14,
                 }}

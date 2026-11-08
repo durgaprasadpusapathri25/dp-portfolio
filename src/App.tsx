@@ -43,6 +43,43 @@ const navigation = [
   { label: 'Contact', href: '#contact' }
 ]
 
+const viewerProfiles = [
+  {
+    id: 'owner',
+    name: 'Durga Prasad',
+    subtitle: 'About me, resume & selected work',
+    avatar: 'DP',
+    style: 'profile-avatar-browse',
+    destination: '#about'
+  },
+  {
+    id: 'client',
+    name: 'Client',
+    subtitle: 'Services, projects & collaboration',
+    avatar: 'C',
+    style: 'profile-avatar-client',
+    destination: '#services'
+  },
+  {
+    id: 'recruiter',
+    name: 'Recruiter',
+    subtitle: 'Background, skills & selected work',
+    avatar: 'R',
+    style: 'profile-avatar-recruiter',
+    destination: '#about'
+  },
+  {
+    id: 'creative',
+    name: 'Creative',
+    subtitle: 'Videos, visuals & digital projects',
+    avatar: '✦',
+    style: 'profile-avatar-creative',
+    destination: '#work'
+  }
+]
+
+type ViewerProfile = (typeof viewerProfiles)[number]
+
 const contactDetails = {
   email: 'durgaprasadpusapathri25@gmail.com',
   whatsapp: '919640233533',
@@ -69,8 +106,27 @@ type PortfolioProject = {
   sort_order: number
 }
 
+
+type StudioProfileSettings = {
+  about_intro: string
+  about_paragraph_2: string
+  about_paragraph_3: string
+  resume_url: string
+}
+
+const defaultStudioProfileSettings: StudioProfileSettings = {
+  about_intro:
+    "I'm a freelance digital creator passionate about bringing creative ideas to life through design, technology, and visual storytelling.",
+  about_paragraph_2:
+    "Whether it's a modern website, a striking visual, or an engaging video, my approach is simple: create work that feels meaningful, thoughtful, and memorable.",
+  about_paragraph_3:
+    'I believe great digital experiences come from combining imagination, attention to detail, and a willingness to keep learning.',
+  resume_url: ''
+}
 function App() {
   const reduceMotion = useReducedMotion()
+  const [profileSettings, setProfileSettings] =
+    useState<StudioProfileSettings>(defaultStudioProfileSettings)
 
   const [projects, setProjects] = useState<PortfolioProject[]>([])
   const [portfolioLoading, setPortfolioLoading] = useState(true)
@@ -79,10 +135,81 @@ function App() {
     useState<PortfolioProject | null>(null)
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeProfileId, setActiveProfileId] = useState<string>(() =>
+    window.sessionStorage.getItem('dp-portfolio-profile') || ''
+  )
 
   const isAllWorksPage =
     window.location.pathname.replace(/\/+$/, '') === '/work'
 
+  const activeProfile = viewerProfiles.find(
+    (profile) => profile.id === activeProfileId
+  )
+
+  const selectProfile = (profile: ViewerProfile) => {
+    window.sessionStorage.setItem(
+      'dp-portfolio-profile',
+      profile.id
+    )
+    setActiveProfileId(profile.id)
+
+    if (!isAllWorksPage && profile.destination !== '#home') {
+      window.setTimeout(() => {
+        document
+          .querySelector(profile.destination)
+          ?.scrollIntoView({
+            behavior: reduceMotion ? 'auto' : 'smooth',
+            block: 'start'
+          })
+      }, 120)
+    }
+  }
+
+  const switchProfile = () => {
+    window.sessionStorage.removeItem('dp-portfolio-profile')
+    setActiveProfileId('')
+    setMobileMenuOpen(false)
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadProfileSettings() {
+      const { data, error } = await supabase
+        .from('studio_settings')
+        .select('about_intro, about_paragraph_2, about_paragraph_3, resume_url')
+        .eq('id', true)
+        .maybeSingle()
+
+      if (cancelled) return
+
+      if (error) {
+        console.error('Unable to load portfolio profile settings:', error.message)
+        return
+      }
+
+      if (data) {
+        setProfileSettings({
+          about_intro:
+            data.about_intro ?? defaultStudioProfileSettings.about_intro,
+          about_paragraph_2:
+            data.about_paragraph_2 ??
+            defaultStudioProfileSettings.about_paragraph_2,
+          about_paragraph_3:
+            data.about_paragraph_3 ??
+            defaultStudioProfileSettings.about_paragraph_3,
+          resume_url: data.resume_url ?? ''
+        })
+      }
+    }
+
+    void loadProfileSettings()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
   useEffect(() => {
     let cancelled = false
 
@@ -132,26 +259,6 @@ function App() {
     }
   }, [])
 
-  const openPortfolioProject = (project: PortfolioProject) => {
-    if (project.project_url) {
-      try {
-        const url = new URL(project.project_url)
-
-        if (
-          url.protocol === 'https:' ||
-          url.protocol === 'http:'
-        ) {
-          window.open(url.href, '_blank', 'noopener,noreferrer')
-          return
-        }
-      } catch {
-        // If the saved URL is invalid, show the project preview instead.
-      }
-    }
-
-    setSelectedProject(project)
-  }
-
   useEffect(() => {
     if (!selectedProject) return
 
@@ -187,6 +294,26 @@ function App() {
       document.removeEventListener('keydown', handleEscape)
     }
   }, [mobileMenuOpen])
+
+  const openPortfolioProject = (project: PortfolioProject) => {
+    if (project.project_url) {
+      try {
+        const url = new URL(project.project_url)
+
+        if (
+          url.protocol === 'https:' ||
+          url.protocol === 'http:'
+        ) {
+          window.open(url.href, '_blank', 'noopener,noreferrer')
+          return
+        }
+      } catch {
+        // If the saved URL is invalid, show the project preview instead.
+      }
+    }
+
+    setSelectedProject(project)
+  }
 
   const reveal = (delay: number, distance = 30) => ({
     initial: {
@@ -273,6 +400,126 @@ function App() {
 
   return (
     <main className="portfolio">
+      <AnimatePresence>
+        {!activeProfile && (
+          <motion.section
+            className="profile-gate"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-gate-title"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: reduceMotion ? 0 : 0.35
+            }}
+          >
+            <div
+              className="profile-gate-backdrop"
+              aria-hidden="true"
+            />
+
+            <motion.div
+              className="profile-gate-content"
+              initial={{
+                opacity: reduceMotion ? 1 : 0,
+                y: reduceMotion ? 0 : 24,
+                scale: reduceMotion ? 1 : 0.98
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1
+              }}
+              exit={{
+                opacity: 0,
+                y: reduceMotion ? 0 : 12,
+                scale: reduceMotion ? 1 : 0.99
+              }}
+              transition={{
+                duration: reduceMotion ? 0 : 0.5,
+                ease: [0.22, 1, 0.36, 1]
+              }}
+            >
+              <div className="profile-gate-brand">
+                <img
+                  src="/dp-logo.png"
+                  alt="DP Creative Studio"
+                  className="profile-gate-logo"
+                />
+                <span>DP CREATIVE STUDIO</span>
+              </div>
+
+              <p className="profile-gate-kicker">
+                A PORTFOLIO ORIGINAL
+              </p>
+
+              <h1 id="profile-gate-title">
+                Who’s watching?
+              </h1>
+
+              <p className="profile-gate-description">
+                Choose a profile to explore Durga Prasad’s
+                creative work.
+              </p>
+
+              <div className="profile-list">
+                {viewerProfiles.map((profile, index) => (
+                  <motion.button
+                    key={profile.id}
+                    type="button"
+                    className="viewer-profile"
+                    onClick={() => selectProfile(profile)}
+                    initial={{
+                      opacity: reduceMotion ? 1 : 0,
+                      y: reduceMotion ? 0 : 18
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0
+                    }}
+                    transition={{
+                      duration: reduceMotion ? 0 : 0.45,
+                      delay: reduceMotion ? 0 : index * 0.08
+                    }}
+                    whileHover={
+                      reduceMotion
+                        ? undefined
+                        : { y: -5, scale: 1.03 }
+                    }
+                    whileTap={
+                      reduceMotion
+                        ? undefined
+                        : { scale: 0.97 }
+                    }
+                    aria-label={`Explore portfolio as ${profile.name}`}
+                  >
+                    <span
+                      className={`profile-avatar ${profile.style}`}
+                      aria-hidden="true"
+                    >
+                      {profile.avatar}
+                    </span>
+
+                    <span className="viewer-profile-name">
+                      {profile.name}
+                    </span>
+
+                    <span className="viewer-profile-subtitle">
+                      {profile.subtitle}
+                    </span>
+                  </motion.button>
+                ))}
+              </div>
+
+              <p className="profile-gate-note">
+                Select a profile to begin
+              </p>
+            </motion.div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
       <motion.nav
         className="navbar"
         aria-label="Main navigation"
@@ -335,6 +582,23 @@ function App() {
           ))}
         </div>
 
+        {activeProfile && (
+          <button
+            type="button"
+            className="profile-switch-button"
+            onClick={switchProfile}
+            aria-label={`Switch profile. Current profile: ${activeProfile.name}`}
+          >
+            <span
+              className={`profile-switch-avatar ${activeProfile.style}`}
+              aria-hidden="true"
+            >
+              {activeProfile.avatar}
+            </span>
+            <span>Switch profile</span>
+          </button>
+        )}
+
         <a
           className="nav-link"
           href={isAllWorksPage ? '/#contact' : '#contact'}
@@ -361,80 +625,78 @@ function App() {
       </motion.nav>
 
       {!isAllWorksPage && (
-        <>
-          <section className="hero-section" id="home">
-            <motion.p
-              className="eyebrow"
-              {...reveal(0.15)}
-            >
-              WELCOME TO MY DIGITAL WORLD
-            </motion.p>
+        <section className="hero-section" id="home">
+          <motion.p
+            className="eyebrow"
+            {...reveal(0.15)}
+          >
+            WELCOME TO MY DIGITAL WORLD
+          </motion.p>
 
-            <motion.h1
-              initial={{
-                opacity: reduceMotion ? 1 : 0,
-                y: reduceMotion ? 0 : 70,
-                filter: reduceMotion ? 'none' : 'blur(12px)'
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                filter: 'blur(0px)'
-              }}
-              transition={{
-                duration: reduceMotion ? 0 : 1.2,
-                delay: reduceMotion ? 0 : 0.3,
-                ease: [0.22, 1, 0.36, 1]
-              }}
-            >
-              I Turn Creative Ideas
-              <br />
-              Into <span>Digital Experiences.</span>
-            </motion.h1>
+          <motion.h1
+            initial={{
+              opacity: reduceMotion ? 1 : 0,
+              y: reduceMotion ? 0 : 70,
+              filter: reduceMotion ? 'none' : 'blur(12px)'
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              filter: 'blur(0px)'
+            }}
+            transition={{
+              duration: reduceMotion ? 0 : 1.2,
+              delay: reduceMotion ? 0 : 0.3,
+              ease: [0.22, 1, 0.36, 1]
+            }}
+          >
+            I Turn Creative Ideas
+            <br />
+            Into <span>Digital Experiences.</span>
+          </motion.h1>
 
-            <motion.p
-              className="hero-description"
-              {...reveal(0.65, 35)}
-            >
-              I'm Durga Prasad, a freelance digital creator
-              crafting modern websites, striking visuals,
-              engaging videos, and memorable digital experiences.
-            </motion.p>
+          <motion.p
+            className="hero-description"
+            {...reveal(0.65, 35)}
+          >
+            I'm Durga Prasad, a freelance digital creator
+            crafting modern websites, striking visuals,
+            engaging videos, and memorable digital experiences.
+          </motion.p>
 
-            <motion.div
-              className="hero-actions"
-              {...reveal(0.85, 30)}
-            >
-              <a href="#work" className="primary-button">
-                Explore My Work ↗
-              </a>
+          <motion.div
+            className="hero-actions"
+            {...reveal(0.85, 30)}
+          >
+            <a href="#work" className="primary-button">
+              Explore My Work ↗
+            </a>
 
-              <a href="#contact" className="secondary-button">
-                Let's Work Together
-              </a>
-            </motion.div>
+            <a href="#contact" className="secondary-button">
+              Let's Work Together
+            </a>
+          </motion.div>
 
-            <motion.p
-              className="hero-signature"
-              {...reveal(1.1, 20)}
-            >
-              DURGA PRASAD{' '}
-              <span>— FREELANCE DIGITAL CREATOR</span>
-            </motion.p>
+          <motion.p
+            className="hero-signature"
+            {...reveal(1.1, 20)}
+          >
+            DURGA PRASAD{' '}
+            <span>— FREELANCE DIGITAL CREATOR</span>
+          </motion.p>
 
-            <motion.a
-              href="#work"
-              className="scroll-indicator"
-              aria-label="Scroll to explore my work"
-              {...reveal(1.4, 15)}
-            >
-              <span>SCROLL TO EXPLORE</span>
-              <span className="scroll-arrow" aria-hidden="true">
-                ↓
-              </span>
-            </motion.a>
-          </section>
-        </>
+          <motion.a
+            href="#work"
+            className="scroll-indicator"
+            aria-label="Scroll to explore my work"
+            {...reveal(1.4, 15)}
+          >
+            <span>SCROLL TO EXPLORE</span>
+            <span className="scroll-arrow" aria-hidden="true">
+              ↓
+            </span>
+          </motion.a>
+        </section>
       )}
 
       <section className="preview-section" id="work">
@@ -847,25 +1109,35 @@ function App() {
                   Hi, I'm <span>Durga Prasad.</span>
                 </h2>
 
-                <p>
-                  I'm a freelance digital creator passionate
-                  about bringing creative ideas to life through
-                  design, technology, and visual storytelling.
-                </p>
+                <p>{profileSettings.about_intro}</p>
 
-                <p>
-                  Whether it's a modern website, a striking
-                  visual, or an engaging video, my approach is
-                  simple: create work that feels meaningful,
-                  thoughtful, and memorable.
-                </p>
+                <p>{profileSettings.about_paragraph_2}</p>
 
-                <p>
-                  I believe great digital experiences come from
-                  combining imagination, attention to detail,
-                  and a willingness to keep learning.
-                </p>
+                <p>{profileSettings.about_paragraph_3}</p>
 
+                {profileSettings.resume_url && (
+                  <a
+                    href={profileSettings.resume_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    download
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginTop: '22px',
+                      padding: '12px 18px',
+                      border: '1px solid #E50914',
+                      borderRadius: '6px',
+                      background: '#E50914',
+                      color: '#FFFFFF',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Download Resume ↗
+                  </a>
+                )}
                 <div className="about-signature">
                   Durga Prasad — Digital Creator
                 </div>
@@ -1275,3 +1547,4 @@ function App() {
 }
 
 export default App
+

@@ -38,21 +38,21 @@ export default function AdminLogin() {
   const inputStyle = {
     width: '100%',
     padding: '15px',
-    border: '1px solid rgba(212,175,110,0.3)',
+    border: '1px solid rgba(229,9,20,0.35)',
     borderRadius: '8px',
-    background: '#171511',
+    background: '#141414',
     color: '#ffffff',
     fontSize: '14px',
     boxSizing: 'border-box' as const,
-    outlineColor: '#d4af6e',
+    outlineColor: '#E50914',
   }
 
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#090909',
-        color: '#f5f0e8',
+        background: '#080808',
+        color: '#F5F5F1',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -66,9 +66,9 @@ export default function AdminLogin() {
           width: '100%',
           maxWidth: '440px',
           padding: '42px 32px',
-          border: '1px solid rgba(212,175,110,0.35)',
+          border: '1px solid rgba(229,9,20,0.4)',
           borderRadius: '18px',
-          background: 'linear-gradient(145deg, #1b1813, #100f0d)',
+          background: 'linear-gradient(145deg, #181818, #111111)',
           boxShadow: '0 25px 80px rgba(0,0,0,0.45)',
           boxSizing: 'border-box',
         }}
@@ -87,7 +87,7 @@ export default function AdminLogin() {
 
           <p
             style={{
-              color: '#d4af6e',
+              color: '#E50914',
               fontSize: '11px',
               letterSpacing: '3px',
               marginBottom: '12px',
@@ -102,10 +102,10 @@ export default function AdminLogin() {
               margin: '0 0 12px',
             }}
           >
-            DP <span style={{ color: '#d4af6e' }}>Dashboard.</span>
+            DP <span style={{ color: '#E50914' }}>Dashboard.</span>
           </h1>
 
-          <p style={{ color: '#a9a196', fontSize: '14px' }}>
+          <p style={{ color: '#B3B3B3', fontSize: '14px' }}>
             Manage your creative business in one place.
           </p>
         </div>
@@ -165,8 +165,8 @@ export default function AdminLogin() {
               padding: '16px',
               border: 'none',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, #e4c78f, #b98d4c)',
-              color: '#15110b',
+              background: 'linear-gradient(135deg, #E50914, #B20710)',
+              color: '#FFFFFF',
               fontSize: '14px',
               fontWeight: 700,
               cursor: loading ? 'wait' : 'pointer',
@@ -181,7 +181,7 @@ export default function AdminLogin() {
               role="status"
               style={{
                 marginTop: '20px',
-                color: '#e4c78f',
+                color: '#E50914',
                 fontSize: '13px',
                 textAlign: 'center',
                 lineHeight: 1.6,
@@ -196,7 +196,7 @@ export default function AdminLogin() {
           style={{
             textAlign: 'center',
             marginTop: '25px',
-            color: '#8f887d',
+            color: '#8B8B8B',
             fontSize: '12px',
           }}
         >
@@ -206,3 +206,4 @@ export default function AdminLogin() {
     </main>
   )
 }
+

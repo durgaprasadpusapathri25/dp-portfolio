@@ -266,9 +266,9 @@ export default function PortfolioSection() {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     boxSizing: 'border-box',
-    background: '#0C0B0A',
-    color: '#F7F2E9',
-    border: '1px solid #493A25',
+    background: '#141414',
+    color: '#F5F5F1',
+    border: '1px solid #3A3A3A',
     borderRadius: 8,
     padding: '12px 13px',
     marginTop: 7,
@@ -278,19 +278,19 @@ export default function PortfolioSection() {
   return (
     <div>
       <section className="dp-admin-card" style={{ marginBottom: 22 }}>
-        <h2 style={{ color: '#D7B477', fontFamily: 'Georgia, serif', marginTop: 0 }}>
+        <h2 style={{ color: '#E50914', fontFamily: 'Georgia, serif', marginTop: 0 }}>
           {editingId ? 'Edit Portfolio Item' : 'Add to Portfolio'}
         </h2>
-        <p style={{ color: '#AFA79C', fontSize: 13, lineHeight: 1.7 }}>
+        <p style={{ color: '#B3B3B3', fontSize: 13, lineHeight: 1.7 }}>
           Add a website, thumbnail, design, or video to your public portfolio.
         </p>
 
-        {error && <p role="alert" style={{ color: '#FFC3AE' }}>{error}</p>}
-        {message && <p role="status" style={{ color: '#D7B477' }}>{message}</p>}
+        {error && <p role="alert" style={{ color: '#FFC3C3' }}>{error}</p>}
+        {message && <p role="status" style={{ color: '#E50914' }}>{message}</p>}
 
         <form onSubmit={handleSave}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,220px),1fr))', gap: 16 }}>
-            <label style={{ color: '#D8C9AE', fontSize: 13 }}>
+            <label style={{ color: '#D7D7D2', fontSize: 13 }}>
               Title *
               <input
                 style={inputStyle}
@@ -301,7 +301,7 @@ export default function PortfolioSection() {
               />
             </label>
 
-            <label style={{ color: '#D8C9AE', fontSize: 13 }}>
+            <label style={{ color: '#D7D7D2', fontSize: 13 }}>
               Category *
               <select
                 style={inputStyle}
@@ -323,7 +323,7 @@ export default function PortfolioSection() {
               </select>
             </label>
 
-            <label style={{ color: '#D8C9AE', fontSize: 13 }}>
+            <label style={{ color: '#D7D7D2', fontSize: 13 }}>
               Website link (optional)
               <input
                 type="url"
@@ -334,7 +334,7 @@ export default function PortfolioSection() {
               />
             </label>
 
-            <label style={{ color: '#D8C9AE', fontSize: 13 }}>
+            <label style={{ color: '#D7D7D2', fontSize: 13 }}>
               Tags (comma separated)
               <input
                 style={inputStyle}
@@ -345,7 +345,7 @@ export default function PortfolioSection() {
             </label>
           </div>
 
-          <label style={{ display: 'block', color: '#D8C9AE', fontSize: 13, marginTop: 16 }}>
+          <label style={{ display: 'block', color: '#D7D7D2', fontSize: 13, marginTop: 16 }}>
             Description
             <textarea
               style={{ ...inputStyle, minHeight: 90, resize: 'vertical' }}
@@ -355,7 +355,7 @@ export default function PortfolioSection() {
             />
           </label>
 
-          <label style={{ display: 'block', color: '#D8C9AE', fontSize: 13, marginTop: 16 }}>
+          <label style={{ display: 'block', color: '#D7D7D2', fontSize: 13, marginTop: 16 }}>
             Image or video {editingId ? '(choose only to replace current media)' : '*'}
             <input
               type="file"
@@ -364,13 +364,13 @@ export default function PortfolioSection() {
               onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
             />
             {currentMediaUrl && !selectedFile && (
-              <span style={{ display: 'block', marginTop: 8, color: '#AFA79C' }}>
+              <span style={{ display: 'block', marginTop: 8, color: '#B3B3B3' }}>
                 Current media will be kept unless you choose a replacement.
               </span>
             )}
           </label>
 
-          <label style={{ display: 'flex', gap: 10, alignItems: 'center', color: '#D8C9AE', marginTop: 18 }}>
+          <label style={{ display: 'flex', gap: 10, alignItems: 'center', color: '#D7D7D2', marginTop: 18 }}>
             <input
               type="checkbox"
               checked={form.is_published}
@@ -393,26 +393,26 @@ export default function PortfolioSection() {
       </section>
 
       <section className="dp-admin-card">
-        <h2 style={{ color: '#D7B477', fontFamily: 'Georgia, serif', marginTop: 0 }}>
+        <h2 style={{ color: '#E50914', fontFamily: 'Georgia, serif', marginTop: 0 }}>
           Portfolio Items ({items.length})
         </h2>
 
         {loading ? (
-          <p style={{ color: '#AFA79C' }}>Loading portfolio items...</p>
+          <p style={{ color: '#B3B3B3' }}>Loading portfolio items...</p>
         ) : items.length === 0 ? (
-          <p style={{ color: '#AFA79C' }}>No portfolio items added yet.</p>
+          <p style={{ color: '#B3B3B3' }}>No portfolio items added yet.</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: 16 }}>
             {items.map((item) => (
-              <article key={item.id} style={{ border: '1px solid #493A25', borderRadius: 10, padding: 14 }}>
+              <article key={item.id} style={{ border: '1px solid #3A3A3A', borderRadius: 10, padding: 14 }}>
                 {item.media_type === 'video' ? (
                   <video src={item.media_url} controls style={{ width: '100%', maxHeight: 220 }} />
                 ) : (
                   <img src={item.media_url} alt={item.alt_text ?? item.title} style={{ width: '100%', maxHeight: 220, objectFit: 'contain' }} />
                 )}
-                <h3 style={{ color: '#F5E4C7' }}>{item.title}</h3>
-                <p style={{ color: '#D7B477' }}>{item.category}</p>
-                <p style={{ color: item.is_published ? '#9BD7A7' : '#AFA79C' }}>
+                <h3 style={{ color: '#F5F5F1' }}>{item.title}</h3>
+                <p style={{ color: '#E50914' }}>{item.category}</p>
+                <p style={{ color: item.is_published ? '#9BD7A7' : '#B3B3B3' }}>
                   {item.is_published ? 'Published' : 'Draft'}
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -434,3 +434,4 @@ export default function PortfolioSection() {
     </div>
   )
 }
+

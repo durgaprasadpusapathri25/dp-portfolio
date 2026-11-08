@@ -18,17 +18,17 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
   padding: '12px 13px',
-  border: '1px solid #493A25',
+  border: '1px solid #3A3A3A',
   borderRadius: 8,
-  background: '#0C0B0A',
-  color: '#F7F2E9',
+  background: '#141414',
+  color: '#F5F5F1',
   fontSize: 14,
-  outlineColor: '#D7B477',
+  outlineColor: '#E50914',
 }
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  color: '#D8C9AE',
+  color: '#D7D7D2',
   fontSize: 13,
   marginBottom: 7,
 }
@@ -165,8 +165,8 @@ export default function StartProjectForm() {
         style={{
           marginTop: 45,
           padding: '17px 35px',
-          background: 'linear-gradient(135deg, #e4c78f, #b98d4c)',
-          color: '#15110b',
+          background: 'linear-gradient(135deg, #E50914, #B20710)',
+          color: '#FFFFFF',
           border: 0,
           borderRadius: 7,
           fontWeight: 700,
@@ -208,10 +208,10 @@ export default function StartProjectForm() {
                 overflowY: 'auto',
                 boxSizing: 'border-box',
                 padding: 26,
-                border: '1px solid #493A25',
+                border: '1px solid #3A3A3A',
                 borderRadius: 16,
-                background: '#151310',
-                color: '#F7F2E9',
+                background: '#181818',
+                color: '#F5F5F1',
                 boxShadow: '0 24px 80px rgba(0,0,0,.55)',
               }}
             >
@@ -225,7 +225,7 @@ export default function StartProjectForm() {
                 <div>
                   <p
                     style={{
-                      color: '#D7B477',
+                      color: '#E50914',
                       fontSize: 11,
                       letterSpacing: 3,
                       margin: '0 0 10px',
@@ -251,11 +251,11 @@ export default function StartProjectForm() {
                   disabled={saving}
                   aria-label="Close project form"
                   style={{
-                    border: '1px solid #493A25',
+                    border: '1px solid #3A3A3A',
                     borderRadius: 8,
                     padding: '7px 11px',
-                    background: '#0C0B0A',
-                    color: '#D7B477',
+                    background: '#141414',
+                    color: '#E50914',
                     fontSize: 20,
                     cursor: 'pointer',
                   }}
@@ -270,10 +270,10 @@ export default function StartProjectForm() {
                   style={{
                     marginTop: 24,
                     padding: 18,
-                    border: '1px solid #493A25',
+                    border: '1px solid #3A3A3A',
                     borderRadius: 10,
-                    background: '#201910',
-                    color: '#E4C78F',
+                    background: '#241416',
+                    color: '#F5F5F1',
                     lineHeight: 1.7,
                   }}
                 >
@@ -288,8 +288,8 @@ export default function StartProjectForm() {
                       padding: '11px 16px',
                       border: 0,
                       borderRadius: 7,
-                      background: '#D7B477',
-                      color: '#17110A',
+                      background: '#E50914',
+                      color: '#FFFFFF',
                       fontWeight: 700,
                       cursor: 'pointer',
                     }}
@@ -301,7 +301,7 @@ export default function StartProjectForm() {
                 <form onSubmit={handleSubmit}>
                   <p
                     style={{
-                      color: '#AFA79C',
+                      color: '#B3B3B3',
                       fontSize: 13,
                       lineHeight: 1.7,
                       margin: '14px 0 20px',
@@ -490,10 +490,10 @@ export default function StartProjectForm() {
                     style={{
                       marginTop: 18,
                       padding: '13px 20px',
-                      border: '1px solid #9B7845',
+                      border: '1px solid #E50914',
                       borderRadius: 8,
-                      background: '#D7B477',
-                      color: '#17110A',
+                      background: '#E50914',
+                      color: '#FFFFFF',
                       fontWeight: 700,
                       cursor: saving ? 'wait' : 'pointer',
                       opacity: saving ? 0.65 : 1,
